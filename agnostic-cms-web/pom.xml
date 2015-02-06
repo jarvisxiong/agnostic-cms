@@ -1,27 +1,36 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.agnosticcms</groupId>
-    <artifactId>agnostic-cms</artifactId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
-  <groupId>com.agnosticcms</groupId>
-  <artifactId>agnostic-cms-web</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>war</packaging>
-  <name>agnostic-cms-web Maven Webapp</name>
-  <url>http://maven.apache.org</url>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-  <build>
-    <finalName>agnostic-cms-web</finalName>
-  </build>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.agnosticcms</groupId>
+		<artifactId>agnostic-cms</artifactId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>agnostic-cms-web</artifactId>
+	<packaging>war</packaging>
+	<name>Agnostic CMS Webapp</name>
+	<url>http://maven.apache.org</url>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<finalName>cms</finalName>
+	</build>
+
 </project>
