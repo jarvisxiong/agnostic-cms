@@ -1,0 +1,65 @@
+sudo a2enmod auth_form
+sudo a2enmod session
+sudo a2enmod request
+sudo a2enmod session_cookie
+sudo service apache2 restart
+sudo a2enmod authn_dbd
+sudo a2enmod session_crypto
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+sudo a2enmod session_dbd
+sudo a2enmod headers
+
+CREATE TABLE apache_user ( username varchar(50) NOT NULL, password CHAR(33) NOT NULL, PRIMARY KEY (username) );
+
+php -r "echo '{SHA}' . base64_encode(sha1('admin', true)) . \"\n\";"
+
+sudo apt-get install libaprutil1-dbd-pgsql
+
+
+
+
+ServerName localhost
+
+
+DBDriver pgsql
+DBDParams "host=localhost dbname=agnosticcms port=5433 user=postgres password=postgres"
+DBDMin  4
+DBDKeep 8
+DBDMax  20
+DBDExptime 300
+DBDPrepareSQL "delete from apache_sessions where key = %s" deletesession
+DBDPrepareSQL "update apache_sessions set value = %s, expiry = %lld, key = %s where key = %s" updatesession
+DBDPrepareSQL "insert into apache_sessions (value, expiry, key) values (%s, %lld, %s)" insertsession
+DBDPrepareSQL "select value from apache_sessions where key = %s and (expiry = 0 or expiry > %lld)" selectsession
+DBDPrepareSQL "delete from apache_sessions where expiry != 0 and expiry < %lld" cleansession
+
+
+
+<Location /cms>
+  AuthFormProvider dbd
+  AuthType form
+  AuthName cms
+ 
+  Session On
+  SessionEnv On
+  SessionDBDCookieName session path=/
+  SessionCryptoPassphrase asjindsdci1232TFA74jas71QWsa
+  SessionHeader X-Replace-Session
+  RequestHeader set X-Session "%{HTTP_SESSION}e"
+  
+  ErrorDocument 401 /login.html
+ 
+  # mod_authz_core configuration
+  Require valid-user
+ 
+  # mod_authn_dbd SQL query to authenticate a user
+  AuthDBDUserPWQuery "SELECT password as password FROM apache_user WHERE username = %s"
+</Location>
+
+
+ProxyPass /cms http://localhost:8080/cms
+ProxyPassReverse  /cms http://localhost:8080/cms
+ProxyPassReverseCookieDomain  localhost:8080 localhost
+ProxyPassReverseCookiePath  /cms  /cms
+

@@ -14,8 +14,16 @@
 		<!-- Maven properties -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	
-		<!-- Project properties -->
+		<!-- Dependency version properties -->
 		<spring.version>4.1.4.RELEASE</spring.version>
+		
+		<!-- Project properties -->
+		<db.host>localhost</db.host>
+		<db.port>5433</db.port>
+		<db.name>agnosticcms</db.name>
+		<db.username>postgres</db.username>
+		<db.password>postgres</db.password>
+		
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -35,11 +43,57 @@
 				<version>${spring.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-tx</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+		        <groupId>org.springframework</groupId>
+		        <artifactId>spring-jdbc</artifactId>
+		        <version>${spring.version}</version>
+		    </dependency>
+		    
+		    <dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-dbcp2</artifactId>
+				<version>2.0.1</version>
+			</dependency>
+			
+			<dependency>
+			    <groupId>javax.servlet</groupId>
+			    <artifactId>javax.servlet-api</artifactId>
+			    <version>3.1.0</version>
+			</dependency>
+			
+			
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>9.3-1102-jdbc41</version>
+			</dependency>
+			<dependency>
+				<groupId>com.feedzai</groupId>
+				<artifactId>pdb</artifactId>
+				<version>2.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jooq</groupId>
+				<artifactId>jooq</artifactId>
+				<version>3.5.1</version>
+			</dependency>
+			
+			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.12</version>
 				<scope>test</scope>
 			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
