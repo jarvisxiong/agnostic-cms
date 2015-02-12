@@ -64,8 +64,12 @@
 	<!-- PulseDB -->
 	<util:properties id="pbdProperties" location="classpath:properties/pdb.properties"/>
 	
-	<bean id="pbdDatabaseEngine" class="com.feedzai.commons.sql.abstraction.engine.DatabaseFactory" factory-method="getConnection">
+	<bean id="pbdDatabaseEngine" class="com.feedzai.commons.sql.abstraction.engine.DatabaseFactory" scope="prototype" factory-method="getConnection">
 		<constructor-arg ref="pbdProperties" />
+	</bean>
+	
+	<bean id="pdbEngineProvider" class="com.agnosticcms.web.dbutil.PdbEngineProvider">
+		<lookup-method name="getEngine" bean="pbdDatabaseEngine"/>
 	</bean>
 	
 </beans>

@@ -16,6 +16,7 @@
 	
 		<!-- Dependency version properties -->
 		<spring.version>4.1.4.RELEASE</spring.version>
+		<log4j.version>2.1</log4j.version>
 		
 		<!-- Project properties -->
 		<db.host>localhost</db.host>
@@ -27,6 +28,7 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<!-- Spring -->
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
@@ -58,19 +60,21 @@
 		        <version>${spring.version}</version>
 		    </dependency>
 		    
+		    <!-- Apache commons -->
 		    <dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
 				<version>2.0.1</version>
 			</dependency>
 			
+			<!-- Server APIs -->
 			<dependency>
 			    <groupId>javax.servlet</groupId>
 			    <artifactId>javax.servlet-api</artifactId>
 			    <version>3.1.0</version>
 			</dependency>
 			
-			
+			<!-- Database -->
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
@@ -87,13 +91,30 @@
 				<version>3.5.1</version>
 			</dependency>
 			
+			<!-- Testing -->
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.12</version>
 				<scope>test</scope>
 			</dependency>
-
+			
+			<!-- Logging -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-jcl</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

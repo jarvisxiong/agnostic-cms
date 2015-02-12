@@ -13,26 +13,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class TestJooqDao {
 
 	@Autowired
-	private DSLContext create;
+	private DSLContext dslContext;
 	
 	public void insertTmpRow() {
-		create.insertInto(DSL.table(TestPdbDao.TMP_TABLE_NAME), DSL.field("id"), DSL.field("description"))
+		dslContext.insertInto(DSL.table(TestPdbDao.TMP_TABLE_NAME), DSL.field("id"), DSL.field("description"))
 			.values(1, "It Works!").execute();
 	}
 	
 	@Transactional
 	public void insertFailingTransactionRows() {
-		create.insertInto(DSL.table(TestPdbDao.TMP_TABLE_NAME), DSL.field("id"), DSL.field("description"))
+		dslContext.insertInto(DSL.table(TestPdbDao.TMP_TABLE_NAME), DSL.field("id"), DSL.field("description"))
 			.values(1, "It Works!").execute();
 		
-		create.insertInto(DSL.table(TestPdbDao.TMP_TABLE_NAME), DSL.field("id"), DSL.field("description"))
+		dslContext.insertInto(DSL.table(TestPdbDao.TMP_TABLE_NAME), DSL.field("id"), DSL.field("description"))
 			.values(2, "It Works2!").execute();
 		
 		throw new DataAccessException("Expected exception");
 	}
 	
 	public Result<Record2<Object, Object>> selectTmpRows() {
-		return create.select(DSL.field("id"), DSL.field("description"))
+		return dslContext.select(DSL.field("id"), DSL.field("description"))
         	.from(DSL.table(TestPdbDao.TMP_TABLE_NAME)).fetch();
 	}
 	
