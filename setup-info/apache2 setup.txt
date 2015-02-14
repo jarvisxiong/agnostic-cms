@@ -10,8 +10,6 @@ sudo a2enmod proxy_http
 sudo a2enmod session_dbd
 sudo a2enmod headers
 
-CREATE TABLE apache_user ( username varchar(50) NOT NULL, password CHAR(33) NOT NULL, PRIMARY KEY (username) );
-
 php -r "echo '{SHA}' . base64_encode(sha1('admin', true)) . \"\n\";"
 
 sudo apt-get install libaprutil1-dbd-pgsql
@@ -28,11 +26,11 @@ DBDMin  4
 DBDKeep 8
 DBDMax  20
 DBDExptime 300
-DBDPrepareSQL "delete from apache_sessions where key = %s" deletesession
-DBDPrepareSQL "update apache_sessions set value = %s, expiry = %lld, key = %s where key = %s" updatesession
-DBDPrepareSQL "insert into apache_sessions (value, expiry, key) values (%s, %lld, %s)" insertsession
-DBDPrepareSQL "select value from apache_sessions where key = %s and (expiry = 0 or expiry > %lld)" selectsession
-DBDPrepareSQL "delete from apache_sessions where expiry != 0 and expiry < %lld" cleansession
+DBDPrepareSQL "delete from cms_sessions where key = %s" deletesession
+DBDPrepareSQL "update cms_sessions set value = %s, expiry = %lld, key = %s where key = %s" updatesession
+DBDPrepareSQL "insert into cms_sessions (value, expiry, key) values (%s, %lld, %s)" insertsession
+DBDPrepareSQL "select value from cms_sessions where key = %s and (expiry = 0 or expiry > %lld)" selectsession
+DBDPrepareSQL "delete from cms_sessions where expiry != 0 and expiry < %lld" cleansession
 
 
 
@@ -54,7 +52,7 @@ DBDPrepareSQL "delete from apache_sessions where expiry != 0 and expiry < %lld" 
   Require valid-user
  
   # mod_authn_dbd SQL query to authenticate a user
-  AuthDBDUserPWQuery "SELECT password as password FROM apache_user WHERE username = %s"
+  AuthDBDUserPWQuery "SELECT password as password FROM cms_users WHERE username = %s"
 </Location>
 
 

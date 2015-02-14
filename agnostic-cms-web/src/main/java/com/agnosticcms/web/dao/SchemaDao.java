@@ -1,6 +1,9 @@
 package com.agnosticcms.web.dao;
 
+import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Repository;
 
 import com.agnosticcms.web.dbutil.PdbEngineProvider;
@@ -17,13 +20,21 @@ import com.feedzai.commons.sql.abstraction.engine.DatabaseEngineException;
 @Repository
 public class SchemaDao {
 
+	private static final String TABLE_NAME_CMS_USERS = "cms_users";
+	private static final String TABLE_NAME_CMS_SESSIONS = "cms_sessions";
+	
 	@Autowired
 	private PdbEngineProvider pdbEngineProvider;
 	
 	@Autowired
 	private CrypService crypService;
-
-	public static final String TMP_TABLE_NAME = "tmp_table";
+	
+	@Autowired
+	private DSLContext dslContext;
+	
+	public boolean cmsTablesExist() {
+		return tableExists(TABLE_NAME_CMS_USERS) && tableExists(TABLE_NAME_CMS_SESSIONS);
+	}
 
 	public void createCmsUsersTable() {
 		
@@ -76,21 +87,31 @@ public class SchemaDao {
 			
 			DbColumn expiryColumn = SqlBuilder
 					.dbColumn()
-					.name("expiryColumn")
+					.name("expiry")
 					.type(DbColumnType.LONG)
 					.addConstraints(DbColumnConstraint.NOT_NULL)
 					.build();
 			
-			DbEntity cmsUsersTable = SqlBuilder.dbEntity()
-			        .name("cms_users")
+			DbEntity cmsSessionsTable = SqlBuilder.dbEntity()
+			        .name(TABLE_NAME_CMS_SESSIONS)
 			        .addColumn(keyColumn)
 			        .addColumn(valueColumn)
 			        .addColumn(expiryColumn)
-			        .pkFields("username")
+			        .pkFields("key")
 			        .build();
 			
-			engine.addEntity(cmsUsersTable);
+			engine.addEntity(cmsSessionsTable);
 		}, "Unable to create cms users table");
+	}
+	
+	public boolean tableExists(String tableName) {
+		try {
+			dslContext.fetchCount(DSL.selectFrom(DSL.table(tableName)));
+		} catch(BadSqlGrammarException e) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	private void execute(PdbWorkContainer pdbInterface, String errorMsg) {

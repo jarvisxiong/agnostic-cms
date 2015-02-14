@@ -16,6 +16,5 @@
 	
 	<import resource="classpath:spring/base-context.xml"/>
 	<import resource="classpath:spring/db-context.xml"/>
-	<import resource="classpath:spring/tiles-context.xml"/>
 	
 </beans>

@@ -13,9 +13,12 @@
 		http://www.springframework.org/schema/tx
 		http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
 		">
-	
-	<import resource="classpath:spring/base-context.xml"/>
-	<import resource="classpath:spring/db-context.xml"/>
-	<import resource="classpath:spring/tiles-context.xml"/>
-	
+
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/layouts/main-view.xml</value>
+			</list>
+		</property>
+	</bean>
 </beans>
