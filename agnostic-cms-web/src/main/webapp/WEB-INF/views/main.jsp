@@ -19,9 +19,7 @@
 
 <body>
 	<div class="container">
-		<div class="row">
-			<tiles:insertAttribute name="body" />
-		</div>
+		<tiles:insertAttribute name="content" />
 	</div>
 </body>
 
