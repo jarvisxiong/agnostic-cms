@@ -24,7 +24,7 @@ public class SchemaDao {
 	public static final String TABLE_NAME_CMS_USERS = "cms_users";
 	public static final String TABLE_NAME_CMS_SESSIONS = "cms_sessions";
 	public static final String TABLE_NAME_CMS_MODULES = "cms_modules";
-	public static final String TABLE_NAME_CMS_MODULE_COLUMNS = "cms_modules_columns";
+	public static final String TABLE_NAME_CMS_MODULE_COLUMNS = "cms_module_columns";
 	public static final String TABLE_NAME_CMS_MODULES_HIERARCHY = "cms_modules_hierarchy";
 	
 	@Autowired
@@ -37,7 +37,8 @@ public class SchemaDao {
 	private DSLContext dslContext;
 	
 	public boolean cmsTablesExist() {
-		return tableExists(TABLE_NAME_CMS_USERS) && tableExists(TABLE_NAME_CMS_SESSIONS);
+		return tableExists(TABLE_NAME_CMS_USERS) && tableExists(TABLE_NAME_CMS_SESSIONS) && tableExists(TABLE_NAME_CMS_MODULES)
+				&& tableExists(TABLE_NAME_CMS_MODULE_COLUMNS) && tableExists(TABLE_NAME_CMS_MODULES_HIERARCHY);
 	}
 
 	public void createCmsUsersTable() {
@@ -74,23 +75,38 @@ public class SchemaDao {
 	public void createCmsModulesTable() {
 		
 		execute((engine) -> {
+			engine.addEntity(getCmsModulesTableDefinition());
+		}, "Unable to create cms modules table");
+	}
+	
+	private DbEntity getCmsModulesTableDefinition() {
+		return SqlBuilder.dbEntity()
+	        .name(TABLE_NAME_CMS_MODULES)
+	        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
+	        .addColumn(SqlBuilder.dbColumn().name("name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(30).build())
+	        .addColumn(SqlBuilder.dbColumn().name("title").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(140).build())
+	        .addColumn(SqlBuilder.dbColumn().name("table_name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(64).build())
+	        .addColumn(SqlBuilder.dbColumn().name("ordered").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
+	        .addColumn(SqlBuilder.dbColumn().name("activated").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
+	        .addColumn(SqlBuilder.dbColumn().name("lov_column_id").type(DbColumnType.LONG).build())
+	        .addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).build())
+	        .pkFields("id")
+	        .build();
+	}
+	
+	/**
+	 * Needed because cms_modules and cms_module_columns have dependency on each other,
+	 * hence fk cannot be inserted on table creation time
+	 */
+	public void createCmsModulesFk() {
+		
+		execute((engine) -> {
 			
-			DbEntity cmsModulesTable = SqlBuilder.dbEntity()
-			        .name(TABLE_NAME_CMS_MODULES)
-			        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
-			        .addColumn(SqlBuilder.dbColumn().name("name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(30).build())
-			        .addColumn(SqlBuilder.dbColumn().name("title").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(140).build())
-			        .addColumn(SqlBuilder.dbColumn().name("table_name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(64).build())
-			        .addColumn(SqlBuilder.dbColumn().name("ordered").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
-			        .addColumn(SqlBuilder.dbColumn().name("activated").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
-			        .addColumn(SqlBuilder.dbColumn().name("lov_column_id").type(DbColumnType.LONG).build())
-			        .addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).build())
-			        .pkFields("id")
-			        .addFk(SqlBuilder.dbFk().addColumn("lov_column_id").foreignTable(TABLE_NAME_CMS_MODULE_COLUMNS).addForeignColumn("id"))
-			        .build();
+			DbEntity fkUpdate = getCmsModulesTableDefinition().newBuilder().addFk(
+				SqlBuilder.dbFk().addColumn("lov_column_id").foreignTable(TABLE_NAME_CMS_MODULE_COLUMNS).addForeignColumn("id")
+			).build();
 			
-			engine.addEntity(cmsModulesTable);
-			
+			engine.updateEntity(fkUpdate);
 		}, "Unable to create cms modules table");
 	}
 	
@@ -105,9 +121,9 @@ public class SchemaDao {
 			        .addColumn(SqlBuilder.dbColumn().name("name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(50).build())
 			        .addColumn(SqlBuilder.dbColumn().name("name_in_db").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(64).build())
 			        .addColumn(SqlBuilder.dbColumn().name("type").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(20).build())
-			        .addColumn(SqlBuilder.dbColumn().name("type_desc").type(DbColumnType.STRING).size(200).addConstraint(DbColumnConstraint.NOT_NULL).build())
+			        .addColumn(SqlBuilder.dbColumn().name("size").type(DbColumnType.INT).build())
 			        .addColumn(SqlBuilder.dbColumn().name("not_null").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
-			        .addColumn(SqlBuilder.dbColumn().name("default").type(DbColumnType.STRING).size(200).build())
+			        .addColumn(SqlBuilder.dbColumn().name("default_value").type(DbColumnType.STRING).size(200).build())
 			        .addColumn(SqlBuilder.dbColumn().name("read_only").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("show_in_list").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("show_in_edit").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
@@ -128,7 +144,7 @@ public class SchemaDao {
 			DbEntity cmsModuleHierarchyTable = SqlBuilder.dbEntity()
 			        .name(TABLE_NAME_CMS_MODULES_HIERARCHY)
 			        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
-			        .addColumn(SqlBuilder.dbColumn().name("module2_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
+			        .addColumn(SqlBuilder.dbColumn().name("module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("module2_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .pkFields("id")
 			        .addFk(SqlBuilder.dbFk().addColumn("module_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))

@@ -13,9 +13,6 @@
             <AppenderRef ref="Console" />
             <AppenderRef ref="MyFile"/>
         </Root>
-        <Logger name="org.jooq" level="debug">
-    		<AppenderRef ref="Console" />
-            <AppenderRef ref="MyFile"/>
-    	</Logger>
+        <Logger name="org.jooq" level="debug" />
     </Loggers>
 </Configuration>

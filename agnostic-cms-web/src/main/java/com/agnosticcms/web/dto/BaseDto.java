@@ -1,6 +1,6 @@
 package com.agnosticcms.web.dto;
 
-public class BaseDto {
+public abstract class BaseDto {
 
 	private Long id;
 

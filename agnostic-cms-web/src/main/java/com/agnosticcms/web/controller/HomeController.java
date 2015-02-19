@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.agnosticcms.web.service.SessionService;
 
 @Controller
-public class HomeController {
+public class HomeController extends RegisteredController {
 	
 	@Autowired
 	private SessionService sessionService;

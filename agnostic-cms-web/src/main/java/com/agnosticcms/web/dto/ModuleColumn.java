@@ -2,17 +2,17 @@ package com.agnosticcms.web.dto;
 
 public class ModuleColumn extends BaseDto {
 
-	private Long modulesId;
+	private Long moduleId;
 	private String name;
 	private String nameInDb;
 	private String type;
-	private String typeDesc;
-	private Boolean allowNulls;
-	private String dbDefault;
+	private Integer size;
+	private Boolean notNull;
+	private String defaultValue;
 	private Boolean readOnly;
 	private Boolean showInList;
 	private Boolean showInEdit;
-	private Boolean orderNum;
+	private Integer orderNum;
 	
 	
 	
@@ -20,27 +20,27 @@ public class ModuleColumn extends BaseDto {
 		super();
 	}
 
-	public ModuleColumn(Long id, Long modulesId, String name, String nameInDb, String type, String typeDesc, Boolean allowNulls, String dbDefault,
-			Boolean readOnly, Boolean showInList, Boolean showInEdit, Boolean orderNum) {
+	public ModuleColumn(Long id, Long modulesId, String name, String nameInDb, String type, Integer size, Boolean notNull, String defaultValue,
+			Boolean readOnly, Boolean showInList, Boolean showInEdit, Integer orderNum) {
 		super(id);
-		this.modulesId = modulesId;
+		this.moduleId = modulesId;
 		this.name = name;
 		this.nameInDb = nameInDb;
 		this.type = type;
-		this.typeDesc = typeDesc;
-		this.allowNulls = allowNulls;
-		this.dbDefault = dbDefault;
+		this.size = size;
+		this.notNull = notNull;
+		this.defaultValue = defaultValue;
 		this.readOnly = readOnly;
 		this.showInList = showInList;
 		this.showInEdit = showInEdit;
 		this.orderNum = orderNum;
 	}
 	
-	public Long getModulesId() {
-		return modulesId;
+	public Long getModuleId() {
+		return moduleId;
 	}
-	public void setModulesId(Long modulesId) {
-		this.modulesId = modulesId;
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
 	}
 	public String getName() {
 		return name;
@@ -60,23 +60,23 @@ public class ModuleColumn extends BaseDto {
 	public void setType(String type) {
 		this.type = type;
 	}
-	public String getTypeDesc() {
-		return typeDesc;
+	public Integer getSize() {
+		return size;
 	}
-	public void setTypeDesc(String typeDesc) {
-		this.typeDesc = typeDesc;
+	public void setSize(Integer size) {
+		this.size = size;
 	}
-	public Boolean getAllowNulls() {
-		return allowNulls;
+	public Boolean getNotNull() {
+		return notNull;
 	}
-	public void setAllowNulls(Boolean allowNulls) {
-		this.allowNulls = allowNulls;
+	public void setNotNull(Boolean notNull) {
+		this.notNull = notNull;
 	}
-	public String getDbDefault() {
-		return dbDefault;
+	public String getDefaultValue() {
+		return defaultValue;
 	}
-	public void setDbDefault(String dbDefault) {
-		this.dbDefault = dbDefault;
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
 	}
 	public Boolean getReadOnly() {
 		return readOnly;
@@ -96,10 +96,10 @@ public class ModuleColumn extends BaseDto {
 	public void setShowInEdit(Boolean showInEdit) {
 		this.showInEdit = showInEdit;
 	}
-	public Boolean getOrderNum() {
+	public Integer getOrderNum() {
 		return orderNum;
 	}
-	public void setOrderNum(Boolean orderNum) {
+	public void setOrderNum(Integer orderNum) {
 		this.orderNum = orderNum;
 	}
 	
