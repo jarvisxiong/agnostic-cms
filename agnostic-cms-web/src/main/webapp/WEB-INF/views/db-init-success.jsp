@@ -3,11 +3,13 @@
  
 <tiles:insertDefinition name="nonregistered.main">
     <tiles:putAttribute name="content">
-    	<div class="row">
-			<div class="col-md-12">
-				<h4>
-					<spring:message code="${messageCode}" />
-				</h4>
+    	<div class="container">
+	    	<div class="row">
+				<div class="col-md-12">
+					<h4>
+						<spring:message code="${messageCode}" />
+					</h4>
+				</div>
 			</div>
 		</div>
     </tiles:putAttribute>

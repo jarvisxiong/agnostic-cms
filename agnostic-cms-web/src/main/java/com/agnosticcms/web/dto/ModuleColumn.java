@@ -5,7 +5,7 @@ public class ModuleColumn extends BaseDto {
 	private Long moduleId;
 	private String name;
 	private String nameInDb;
-	private String type;
+	private ColumnType type;
 	private Integer size;
 	private Boolean notNull;
 	private String defaultValue;
@@ -20,7 +20,7 @@ public class ModuleColumn extends BaseDto {
 		super();
 	}
 
-	public ModuleColumn(Long id, Long modulesId, String name, String nameInDb, String type, Integer size, Boolean notNull, String defaultValue,
+	public ModuleColumn(Long id, Long modulesId, String name, String nameInDb, ColumnType type, Integer size, Boolean notNull, String defaultValue,
 			Boolean readOnly, Boolean showInList, Boolean showInEdit, Integer orderNum) {
 		super(id);
 		this.moduleId = modulesId;
@@ -54,10 +54,10 @@ public class ModuleColumn extends BaseDto {
 	public void setNameInDb(String nameInDb) {
 		this.nameInDb = nameInDb;
 	}
-	public String getType() {
+	public ColumnType getType() {
 		return type;
 	}
-	public void setType(String type) {
+	public void setType(ColumnType type) {
 		this.type = type;
 	}
 	public Integer getSize() {

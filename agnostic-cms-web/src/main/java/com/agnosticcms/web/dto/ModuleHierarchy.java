@@ -2,33 +2,33 @@ package com.agnosticcms.web.dto;
 
 public class ModuleHierarchy extends BaseDto {
 
-	private Long module_id;
-	private Long module2_id;
+	private Long moduleId;
+	private Long module2Id;
 	
 	public ModuleHierarchy() {
 		super();
 	}
 
-	public ModuleHierarchy(Long id, Long module_id, Long module2_id) {
+	public ModuleHierarchy(Long id, Long moduleId, Long module2Id) {
 		super(id);
-		this.module_id = module_id;
-		this.module2_id = module2_id;
+		this.moduleId = moduleId;
+		this.module2Id = module2Id;
 	}
 
-	public Long getModule_id() {
-		return module_id;
+	public Long getModuleId() {
+		return moduleId;
 	}
 	
-	public void setModule_id(Long module_id) {
-		this.module_id = module_id;
+	public void setModule_id(Long moduleId) {
+		this.moduleId = moduleId;
 	}
 	
-	public Long getModule2_id() {
-		return module2_id;
+	public Long getModule2Id() {
+		return module2Id;
 	}
 	
-	public void setModule2_id(Long module2_id) {
-		this.module2_id = module2_id;
+	public void setModule2Id(Long module2Id) {
+		this.module2Id = module2Id;
 	}
 	
 }

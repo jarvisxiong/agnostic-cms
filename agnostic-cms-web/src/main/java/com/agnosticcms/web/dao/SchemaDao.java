@@ -25,7 +25,7 @@ public class SchemaDao {
 	public static final String TABLE_NAME_CMS_SESSIONS = "cms_sessions";
 	public static final String TABLE_NAME_CMS_MODULES = "cms_modules";
 	public static final String TABLE_NAME_CMS_MODULE_COLUMNS = "cms_module_columns";
-	public static final String TABLE_NAME_CMS_MODULES_HIERARCHY = "cms_modules_hierarchy";
+	public static final String TABLE_NAME_CMS_MODULE_HIERARCHY = "cms_module_hierarchy";
 	
 	@Autowired
 	private PdbEngineProvider pdbEngineProvider;
@@ -38,7 +38,7 @@ public class SchemaDao {
 	
 	public boolean cmsTablesExist() {
 		return tableExists(TABLE_NAME_CMS_USERS) && tableExists(TABLE_NAME_CMS_SESSIONS) && tableExists(TABLE_NAME_CMS_MODULES)
-				&& tableExists(TABLE_NAME_CMS_MODULE_COLUMNS) && tableExists(TABLE_NAME_CMS_MODULES_HIERARCHY);
+				&& tableExists(TABLE_NAME_CMS_MODULE_COLUMNS) && tableExists(TABLE_NAME_CMS_MODULE_HIERARCHY);
 	}
 
 	public void createCmsUsersTable() {
@@ -88,7 +88,7 @@ public class SchemaDao {
 	        .addColumn(SqlBuilder.dbColumn().name("table_name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(64).build())
 	        .addColumn(SqlBuilder.dbColumn().name("ordered").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 	        .addColumn(SqlBuilder.dbColumn().name("activated").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
-	        .addColumn(SqlBuilder.dbColumn().name("lov_column_id").type(DbColumnType.LONG).build())
+	        .addColumn(SqlBuilder.dbColumn().name("cms_module_column_id").type(DbColumnType.LONG).build())
 	        .addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).build())
 	        .pkFields("id")
 	        .build();
@@ -103,7 +103,7 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity fkUpdate = getCmsModulesTableDefinition().newBuilder().addFk(
-				SqlBuilder.dbFk().addColumn("lov_column_id").foreignTable(TABLE_NAME_CMS_MODULE_COLUMNS).addForeignColumn("id")
+				SqlBuilder.dbFk().addColumn("cms_module_column_id").foreignTable(TABLE_NAME_CMS_MODULE_COLUMNS).addForeignColumn("id")
 			).build();
 			
 			engine.updateEntity(fkUpdate);
@@ -117,7 +117,7 @@ public class SchemaDao {
 			DbEntity cmsModulesTable = SqlBuilder.dbEntity()
 			        .name(TABLE_NAME_CMS_MODULE_COLUMNS)
 			        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
-			        .addColumn(SqlBuilder.dbColumn().name("module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
+			        .addColumn(SqlBuilder.dbColumn().name("cms_module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(50).build())
 			        .addColumn(SqlBuilder.dbColumn().name("name_in_db").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(64).build())
 			        .addColumn(SqlBuilder.dbColumn().name("type").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(20).build())
@@ -129,7 +129,7 @@ public class SchemaDao {
 			        .addColumn(SqlBuilder.dbColumn().name("show_in_edit").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .pkFields("id")
-			        .addFk(SqlBuilder.dbFk().addColumn("module_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
+			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
 			        .build();
 			
 			engine.addEntity(cmsModulesTable);
@@ -142,13 +142,13 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity cmsModuleHierarchyTable = SqlBuilder.dbEntity()
-			        .name(TABLE_NAME_CMS_MODULES_HIERARCHY)
+			        .name(TABLE_NAME_CMS_MODULE_HIERARCHY)
 			        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
-			        .addColumn(SqlBuilder.dbColumn().name("module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
-			        .addColumn(SqlBuilder.dbColumn().name("module2_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
+			        .addColumn(SqlBuilder.dbColumn().name("cms_module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
+			        .addColumn(SqlBuilder.dbColumn().name("cms_module2_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .pkFields("id")
-			        .addFk(SqlBuilder.dbFk().addColumn("module_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
-			        .addFk(SqlBuilder.dbFk().addColumn("module2_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
+			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
+			        .addFk(SqlBuilder.dbFk().addColumn("cms_module2_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
 			        .build();
 			
 			engine.addEntity(cmsModuleHierarchyTable);
