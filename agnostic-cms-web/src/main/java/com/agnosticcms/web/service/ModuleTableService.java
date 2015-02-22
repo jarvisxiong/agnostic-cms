@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.agnosticcms.web.dao.ModuleDao;
 import com.agnosticcms.web.dao.ModuleTableDao;
+import com.agnosticcms.web.dto.ClassifierItem;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
 
@@ -31,36 +32,49 @@ public class ModuleTableService {
 		return moduleTableDao.getRows(module);
 	}
 	
-	public Map<Integer, Map<Long, Object>> getLovsForModule(Module module, List<Module> parentModules, List<String> fkNames, Result<Record> moduleTableRecords) {
+	private <T> Map<Integer, T> getLovs(List<Module> parentModules, List<String> fkNames, LovResultsRetriever<T> resultsRetriever) {
 		
 		List<Long> parentLovColumnIds = parentModules.stream().map(mc -> mc.getLovColumnId()).collect(Collectors.toList());
 		Map<Long, ModuleColumn> lovColumns = moduleDao.getColumnsByIds(parentLovColumnIds);
-		Map<Integer, Map<Long, Object>> lovs = new HashMap<>();
+		Map<Integer, T> lovs = new HashMap<>();
 		
 		int i = 0;
 		for(Module parentModule : parentModules) {
 			
 			String tableName = parentModule.getTableName();
 			
-			Set<Long> parentRowIds = moduleTableRecords.intoSet(fkNames.get(i), Long.class);
-			// remove null for row that do not have association with particular parent enabled
-			parentRowIds.remove(null);
-			
 			ModuleColumn lovColumn = lovColumns.get(parentModule.getLovColumnId());
 			
 			if(lovColumn != null) {
-				Map<Long, Object> fieldsByIds = moduleTableDao.getFieldsByIds(tableName, lovColumn.getNameInDb(), parentRowIds);
-				lovs.put(i, fieldsByIds);
-				
+				lovs.put(i, resultsRetriever.retrieve(tableName, lovColumn.getNameInDb(), i));
 			} else {
 				throw new IllegalArgumentException("No List Of Values column for parent table " + tableName);
 			}
-			
 			
 			i++;
 		}
 		
 		return lovs;
+	}
+	
+	public Map<Integer, Map<Long, Object>> getLovs(List<Module> parentModules, List<String> fkNames, Result<Record> moduleTableRecords) {
+		
+		return getLovs(parentModules, fkNames, (String tableName, String nameInDb, Integer index) -> {
+			final Set<Long> parentRowIds = moduleTableRecords.intoSet(fkNames.get(index), Long.class);
+			// remove null for row that do not have association with particular parent enabled
+			parentRowIds.remove(null);
+
+			return moduleTableDao.getSingleFieldValueMap(tableName, nameInDb, parentRowIds);
+		});
+	}
+	
+	public Map<Integer, List<ClassifierItem>> getClassifierItems(List<Module> parentModules) {
+		
+		List<String> fkNames = getForeignKeyNames(parentModules);
+		
+		return getLovs(parentModules, fkNames, (String tableName, String nameInDb, Integer index) -> {
+			return moduleTableDao.getClassifierItems(tableName, nameInDb);
+		});
 	}
 	
 	public List<String> getForeignKeyNames(List<Module> parentModules) {
@@ -103,5 +117,10 @@ public class ModuleTableService {
 		foreignKeyId += "_id";
 		
 		return foreignKeyId;
+	}
+	
+	@FunctionalInterface
+	private interface LovResultsRetriever<T> {
+		public T retrieve(String tableName, String nameInDb, Integer index);
 	}
 }

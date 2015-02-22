@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.agnosticcms.web.dto.ClassifierItem;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
 import com.agnosticcms.web.exception.ResourceNotFoundException;
@@ -34,18 +35,14 @@ public class ModuleController extends RegisteredController {
 	@RequestMapping("/view/{id}")
 	public String view(@PathVariable Long id, Model model) {
 		
-		Module module = moduleService.getModule(id);
-		
-		if(module == null) {
-			throw new ResourceNotFoundException();
-		}
+		Module module = getModule(id);
 		
 		List<Module> parentModules = moduleService.getParentModules(id);
 		List<ModuleColumn> columns = moduleService.getModuleColumns(id);
 		Result<Record> rawRows = moduleTableService.getRows(module);
 		List<String> foreignKeyNames = moduleTableService.getForeignKeyNames(parentModules);
 		// 'list of values'
-		Map<Integer, Map<Long, Object>> lovs = moduleTableService.getLovsForModule(module, parentModules, foreignKeyNames, rawRows);
+		Map<Integer, Map<Long, Object>> lovs = moduleTableService.getLovs(parentModules, foreignKeyNames, rawRows);
 		
 		model.addAttribute("module", module);
 		model.addAttribute("parentModules", parentModules);
@@ -55,6 +52,35 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("lovs", lovs);
 		model.addAttribute("selectedModuleId", id);
 		return "registered/body/module-view";
+	}
+	
+	@RequestMapping("/add/{id}")
+	public String add(@PathVariable Long id, Model model) {
+		
+		Module module = getModule(id);
+		
+		List<Module> parentModules = moduleService.getParentModules(id);
+		List<ModuleColumn> columns = moduleService.getModuleColumns(id);
+		Map<Integer, List<ClassifierItem>> dropdownClassifiers = moduleTableService.getClassifierItems(parentModules);
+		
+		
+		
+		model.addAttribute("module", module);
+		model.addAttribute("parentModules", parentModules);
+		model.addAttribute("columns", columns);
+		model.addAttribute("dropdownClassifiers", dropdownClassifiers);
+		model.addAttribute("selectedModuleId", id);
+		return "registered/body/module-add";
+	}
+	
+	private Module getModule(Long id) {
+		Module module =  moduleService.getModule(id);
+		
+		if(module == null) {
+			throw new ResourceNotFoundException();
+		}
+		
+		return module;
 	}
 
 }
