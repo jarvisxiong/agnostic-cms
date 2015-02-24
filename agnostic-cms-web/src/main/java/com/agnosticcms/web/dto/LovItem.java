@@ -1,13 +1,13 @@
 package com.agnosticcms.web.dto;
 
-public class ClassifierItem extends BaseDto {
+public class LovItem extends BaseDto {
 
 	private Object value;
 
-	public ClassifierItem() {
+	public LovItem() {
 	}
 
-	public ClassifierItem(Long id, Object value) {
+	public LovItem(Long id, Object value) {
 		super(id);
 		this.value = value;
 	}

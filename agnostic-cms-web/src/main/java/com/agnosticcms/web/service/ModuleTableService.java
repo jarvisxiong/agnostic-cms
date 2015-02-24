@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.agnosticcms.web.dao.ModuleDao;
 import com.agnosticcms.web.dao.ModuleTableDao;
-import com.agnosticcms.web.dto.ClassifierItem;
+import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
 
@@ -32,7 +32,7 @@ public class ModuleTableService {
 		return moduleTableDao.getRows(module);
 	}
 	
-	private <T> Map<Integer, T> getLovs(List<Module> parentModules, List<String> fkNames, LovResultsRetriever<T> resultsRetriever) {
+	private <T> Map<Integer, T> getLov(List<Module> parentModules, List<String> fkNames, LovResultsRetriever<T> resultsRetriever) {
 		
 		List<Long> parentLovColumnIds = parentModules.stream().map(mc -> mc.getLovColumnId()).collect(Collectors.toList());
 		Map<Long, ModuleColumn> lovColumns = moduleDao.getColumnsByIds(parentLovColumnIds);
@@ -46,7 +46,7 @@ public class ModuleTableService {
 			ModuleColumn lovColumn = lovColumns.get(parentModule.getLovColumnId());
 			
 			if(lovColumn != null) {
-				lovs.put(i, resultsRetriever.retrieve(tableName, lovColumn.getNameInDb(), i));
+				lovs.put(i, resultsRetriever.retrieve(tableName, lovColumn, i));
 			} else {
 				throw new IllegalArgumentException("No List Of Values column for parent table " + tableName);
 			}
@@ -59,21 +59,24 @@ public class ModuleTableService {
 	
 	public Map<Integer, Map<Long, Object>> getLovs(List<Module> parentModules, List<String> fkNames, Result<Record> moduleTableRecords) {
 		
-		return getLovs(parentModules, fkNames, (String tableName, String nameInDb, Integer index) -> {
+		return getLov(parentModules, fkNames, (String tableName, ModuleColumn lovColumn, Integer index) -> {
 			final Set<Long> parentRowIds = moduleTableRecords.intoSet(fkNames.get(index), Long.class);
 			// remove null for row that do not have association with particular parent enabled
 			parentRowIds.remove(null);
 
-			return moduleTableDao.getSingleFieldValueMap(tableName, nameInDb, parentRowIds);
+			return moduleTableDao.getSingleFieldValueMap(tableName, lovColumn.getNameInDb(), parentRowIds);
 		});
 	}
 	
-	public Map<Integer, List<ClassifierItem>> getClassifierItems(List<Module> parentModules) {
+	public Map<Integer, Lov> getClassifierItems(List<Module> parentModules) {
 		
 		List<String> fkNames = getForeignKeyNames(parentModules);
 		
-		return getLovs(parentModules, fkNames, (String tableName, String nameInDb, Integer index) -> {
-			return moduleTableDao.getClassifierItems(tableName, nameInDb);
+		return getLov(parentModules, fkNames, (String tableName, ModuleColumn lovColumn, Integer index) -> {
+			Lov lov = new Lov();
+			lov.setType(lovColumn.getType());
+			lov.setItems(moduleTableDao.getClassifierItems(tableName, lovColumn.getNameInDb()));
+			return lov;
 		});
 	}
 	
@@ -121,6 +124,6 @@ public class ModuleTableService {
 	
 	@FunctionalInterface
 	private interface LovResultsRetriever<T> {
-		public T retrieve(String tableName, String nameInDb, Integer index);
+		public T retrieve(String tableName, ModuleColumn moduleColumn, Integer index);
 	}
 }

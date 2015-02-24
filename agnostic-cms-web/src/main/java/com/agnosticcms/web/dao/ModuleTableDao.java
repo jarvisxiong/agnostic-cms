@@ -14,7 +14,7 @@ import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.agnosticcms.web.dto.ClassifierItem;
+import com.agnosticcms.web.dto.LovItem;
 import com.agnosticcms.web.dto.Module;
 
 @Repository
@@ -36,12 +36,12 @@ public class ModuleTableDao {
 					.fetchMap(field("id", Long.class), field(columnName));
 	}
 	
-	public List<ClassifierItem> getClassifierItems(String tableName, String columnName) {
+	public List<LovItem> getClassifierItems(String tableName, String columnName) {
 		return dslContext
 				.select(field("id"), field(columnName))
 				.from(table(tableName))
 				.fetch(r -> {
-					return new ClassifierItem(r.getValue("id", Long.class), r.getValue(columnName));
+					return new LovItem(r.getValue("id", Long.class), r.getValue(columnName));
 				});
 	}
 	
