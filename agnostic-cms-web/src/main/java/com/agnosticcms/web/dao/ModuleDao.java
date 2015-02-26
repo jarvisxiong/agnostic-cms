@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.InsertValuesStep12;
-import org.jooq.InsertValuesStep3;
+import org.jooq.InsertValuesStep4;
 import org.jooq.InsertValuesStep8;
 import org.jooq.Query;
 import org.jooq.Record;
@@ -54,10 +54,10 @@ public class ModuleDao {
 	}
 	
 	public void insertModuleHierarchies(Collection<ModuleHierarchy> moduleHierarchies) {
-		this.<ModuleHierarchy, InsertValuesStep3<Record, ?, ?, ?>>executeInsertBatch(moduleHierarchies, moduleHierarchy -> {
+		this.<ModuleHierarchy, InsertValuesStep4<Record, ?, ?, ?, ?>>executeInsertBatch(moduleHierarchies, moduleHierarchy -> {
 			return dslContext.insertInto(
-					table(SchemaDao.TABLE_NAME_CMS_MODULE_HIERARCHY), field("id"), field("cms_module_id"), field("cms_module2_id"))
-					.values(moduleHierarchy.getId(), moduleHierarchy.getModuleId(), moduleHierarchy.getModule2Id());
+					table(SchemaDao.TABLE_NAME_CMS_MODULE_HIERARCHY), field("id"), field("cms_module_id"), field("cms_module2_id"), field("mandatory"))
+					.values(moduleHierarchy.getId(), moduleHierarchy.getModuleId(), moduleHierarchy.getModule2Id(), moduleHierarchy.getMandatory());
 		});
 	}
 	
@@ -92,6 +92,14 @@ public class ModuleDao {
 				.fetch(new ModuleRecordMapper());
 	}
 	
+	public List<ModuleHierarchy> getModuleHierarchies(Long moduleId) {
+		return dslContext.select(field("id"), field("cms_module_id"), field("cms_module2_id"), field("mandatory"))
+				.from(table(SchemaDao.TABLE_NAME_CMS_MODULE_HIERARCHY))
+				.where(field("cms_module2_id").equal(moduleId))
+				.orderBy(field("id"))
+				.fetch(new ModuleHierarchyMapper());
+	}
+	
 	private <T, Q extends Query> void executeInsertBatch(Collection<T> objectsToInsert, Function<? super T, ? extends Q> mapFunction) {
 		List<Q> insertStatements = objectsToInsert.stream().map(mapFunction).collect(Collectors.toList());
 		dslContext.batch(insertStatements).execute();
@@ -116,6 +124,15 @@ public class ModuleDao {
 					r.getValue("name_in_db", String.class), r.getValue("type", ColumnType.class), r.getValue("size", Integer.class),
 					r.getValue("not_null", Boolean.class), r.getValue("default_value", String.class), r.getValue("read_only", Boolean.class),
 					r.getValue("show_in_list", Boolean.class), r.getValue("show_in_edit", Boolean.class), r.getValue("order_num", Integer.class));
+		}
+		
+	}
+	
+	private class ModuleHierarchyMapper implements RecordMapper<Record, ModuleHierarchy> {
+
+		@Override
+		public ModuleHierarchy map(Record r) {
+			return new ModuleHierarchy(r.getValue("id", Long.class), r.getValue("cms_module_id", Long.class), r.getValue("cms_module2_id", Long.class), r.getValue("mandatory", Boolean.class));
 		}
 		
 	}

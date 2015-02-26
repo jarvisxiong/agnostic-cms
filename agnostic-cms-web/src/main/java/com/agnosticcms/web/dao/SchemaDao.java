@@ -146,6 +146,7 @@ public class SchemaDao {
 			        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("cms_module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("cms_module2_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
+			        .addColumn(SqlBuilder.dbColumn().name("mandatory").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .pkFields("id")
 			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
 			        .addFk(SqlBuilder.dbFk().addColumn("cms_module2_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))

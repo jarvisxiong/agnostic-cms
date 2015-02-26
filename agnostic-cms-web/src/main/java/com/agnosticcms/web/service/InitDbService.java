@@ -52,10 +52,10 @@ public class InitDbService {
 		
 		List<ModuleColumn> moduleColumns = new ArrayList<>();
 		moduleColumns.add(new ModuleColumn(1l, 1l, "Name", "name", ColumnType.STRING, 30, true, null, false, true, true, 1));
-		moduleColumns.add(new ModuleColumn(2l, 1l, "Title", "title", ColumnType.STRING, 140, false, null, false, true, true, 2));
-		moduleColumns.add(new ModuleColumn(3l, 1l, "Table Name", "table_name", ColumnType.STRING, 64, false, null, false, true, true, 3));
-		moduleColumns.add(new ModuleColumn(4l, 1l, "Is Ordered", "ordered", ColumnType.BOOL, null, false, null, false, true, true, 4));
-		moduleColumns.add(new ModuleColumn(5l, 1l, "Activated", "activated", ColumnType.BOOL, null, false, null, false, true, true, 5));
+		moduleColumns.add(new ModuleColumn(2l, 1l, "Title", "title", ColumnType.STRING, 140, true, null, false, true, true, 2));
+		moduleColumns.add(new ModuleColumn(3l, 1l, "Table Name", "table_name", ColumnType.STRING, 64, true, null, false, true, true, 3));
+		moduleColumns.add(new ModuleColumn(4l, 1l, "Is Ordered", "ordered", ColumnType.BOOL, null, true, null, false, true, true, 4));
+		moduleColumns.add(new ModuleColumn(5l, 1l, "Activated", "activated", ColumnType.BOOL, null, true, null, false, true, true, 5));
 		moduleColumns.add(new ModuleColumn(7l, 2l, "Name", "name", ColumnType.STRING, 50, true, null, false, true, true, 1));
 		moduleColumns.add(new ModuleColumn(8l, 2l, "Name id DB", "name_in_db", ColumnType.STRING, 64, true, null, false, true, true, 2));
 		moduleColumns.add(new ModuleColumn(9l, 2l, "Type", "type", ColumnType.STRING, 20, true, null, false, true, true, 3));
@@ -68,10 +68,10 @@ public class InitDbService {
 		moduleDao.insertModuleColumns(moduleColumns);
 		
 		List<ModuleHierarchy> moduleHierarchies = new ArrayList<>();
-		moduleHierarchies.add(new ModuleHierarchy(1l, 2l, 1l));
-		moduleHierarchies.add(new ModuleHierarchy(2l, 1l, 2l));
-		moduleHierarchies.add(new ModuleHierarchy(3l, 1l, 3l));
-		moduleHierarchies.add(new ModuleHierarchy(4l, 1l, 3l));
+		moduleHierarchies.add(new ModuleHierarchy(1l, 2l, 1l, false));
+		moduleHierarchies.add(new ModuleHierarchy(2l, 1l, 2l, true));
+		moduleHierarchies.add(new ModuleHierarchy(3l, 1l, 3l, true));
+		moduleHierarchies.add(new ModuleHierarchy(4l, 1l, 3l, true));
 		moduleDao.insertModuleHierarchies(moduleHierarchies);
 		
 		schemaDao.createCmsModulesFk();

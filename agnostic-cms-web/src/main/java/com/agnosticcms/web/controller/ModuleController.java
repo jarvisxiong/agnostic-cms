@@ -17,13 +17,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
+import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.dto.form.ModuleInput;
 import com.agnosticcms.web.dto.form.ValidatableModuleInput;
 import com.agnosticcms.web.exception.ResourceNotFoundException;
 import com.agnosticcms.web.service.ModuleService;
 import com.agnosticcms.web.service.ModuleTableService;
 import com.agnosticcms.web.service.SessionService;
-import com.agnosticcms.web.validation.ValidatableModelInputValidator;
+import com.agnosticcms.web.validation.ModelInputValidator;
 
 @Controller
 @RequestMapping("module")
@@ -39,7 +40,7 @@ public class ModuleController extends RegisteredController {
 	private ModuleTableService moduleTableService;
 	
 	@Autowired
-	private ValidatableModelInputValidator validatableModelInputValidator;
+	private ModelInputValidator validatableModelInputValidator;
 	
 	@RequestMapping("/view/{id}")
 	public String view(@PathVariable("id") Long moduleId, Model model) {
@@ -71,6 +72,7 @@ public class ModuleController extends RegisteredController {
 		List<Module> parentModules = moduleService.getParentModules(moduleId);
 		List<ModuleColumn> columns = moduleService.getModuleColumns(moduleId);
 		Map<Integer, Lov> lovs = moduleTableService.getClassifierItems(parentModules);
+		ModuleInput moduleInput = moduleService.getDefaultModuleInput(columns);
 		
 		
 		
@@ -79,7 +81,7 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("columns", columns);
 		model.addAttribute("lovs", lovs);
 		model.addAttribute("selectedModuleId", moduleId);
-		model.addAttribute("command", new ModuleInput());
+		model.addAttribute("moduleInput", moduleInput);
 		return "registered/body/module-add";
 	}
 	
@@ -92,22 +94,28 @@ public class ModuleController extends RegisteredController {
 		
 		Module module = getModule(moduleId);
 		
+		List<Module> parentModules = moduleService.getParentModules(moduleId);
+		List<ModuleColumn> moduleColumns = moduleService.getModuleColumns(moduleId);
+		List<ModuleHierarchy> moduleHierarchies = moduleService.getModuleHierarchies(moduleId);
+		
 		ValidatableModuleInput validatableModuleInput = new ValidatableModuleInput();
 		validatableModuleInput.setModuleInput(moduleInput);
+		validatableModuleInput.setModuleColumns(moduleColumns);
+		validatableModuleInput.setModuleHierarchies(moduleHierarchies);
+
 		
 		validatableModelInputValidator.validate(validatableModuleInput, result);
 		
 		if(result.hasErrors()) {
-			List<Module> parentModules = moduleService.getParentModules(moduleId);
-			List<ModuleColumn> columns = moduleService.getModuleColumns(moduleId);
+			
 			Map<Integer, Lov> lovs = moduleTableService.getClassifierItems(parentModules);
 			
 			model.addAttribute("module", module);
 			model.addAttribute("parentModules", parentModules);
-			model.addAttribute("columns", columns);
+			model.addAttribute("columns", moduleColumns);
 			model.addAttribute("lovs", lovs);
 			model.addAttribute("selectedModuleId", moduleId);
-			model.addAttribute("command", moduleInput);
+			model.addAttribute("moduleInput", moduleInput);
 			return "registered/body/module-add";
 		} else {
 			return "redirect:/module/view/" + moduleId;

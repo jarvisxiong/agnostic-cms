@@ -4,17 +4,22 @@
 <%@ taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 
+<c:set var="errorScope" value="${requestScope['org.springframework.validation.BindingResult.moduleInput']}" />
+
  
 <tiles:insertDefinition name="registered.main">
     <tiles:putAttribute cascade="true" name="body">
     	<h1><spring:message code="module.add.title" /> ${module.title}</h1>
-		<form:form method="POST" action="">
+		<form:form method="POST" action="" commandName="moduleInput">
 			<c:forEach var="parentModule" items="${parentModules}" varStatus="loop">
-				<c:set var="inputId" value="lov-input-${parentModule.id}" />				
+				<c:set var="inputId" value="lov-input-${parentModule.id}" />
+				<c:set var="path" value="lovValues[${parentModule.id}]" />
+				<c:set var="errorClass" value="${errorScope.hasFieldErrors(path) ? ' has-error' : ''}" />
 
-				<div class="form-group">
-					<label for="${inputId}">${parentModule.name}</label>
-					<form:select id="${inputId}" path="lovValues[${parentModule.id}]" cssClass="form-control">
+				<div class="form-group${errorClass}">
+					<label class="control-label" for="${inputId}">${parentModule.name}</label>
+					<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
+					<form:select id="${inputId}" path="${path}" cssClass="form-control">
 					
 						<form:option value="" label="" />
 					
@@ -29,23 +34,25 @@
 			<c:forEach var="column" items="${columns}">
 				<c:set var="inputId" value="input-${column.id}" />
 				<c:set var="path" value="columnValues[${column.id}]" />
+				<c:set var="errorClass" value="${errorScope.hasFieldErrors(path) ? ' has-error' : ''}" />
 				
 				<c:choose>
 					<c:when test="${column.type == 'STRING' or column.type == 'LONG' or column.type == 'INT'}">
-						<div class="form-group">
-							<label for="${inputId}">${column.name}</label>
-							<form:errors path="${path}" cssClass="text-danger" element="div" />
-							<div class="text-danger">Test error</div>
-							<form:input path="${path}" cssClass="form-control" id="${inputId}" placeholder="${column.defaultValue}" />
+						<div class="form-group${errorClass}">
+							<label class="control-label" for="${inputId}">${column.name}</label>
+							<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
+							<form:input path="${path}" cssClass="form-control" id="${inputId}" />
 						</div>
 					</c:when>
 					<c:when test="${column.type == 'BOOL'}">
-						<div class="checkbox">
-							<div class="text-danger">Test error</div>
-							<label for="${inputId}">
-								<form:checkbox value="true" path="${path}" id="${inputId}" />
-								${column.name}
-							</label>
+						<div class="${errorClass}">
+							<div class="checkbox">
+								<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
+								<label for="${inputId}">
+									<form:checkbox value="true" path="${path}" id="${inputId}" />
+									${column.name}
+								</label>
+							</div>
 						</div>
 					</c:when>
 					<c:otherwise>undefined</c:otherwise>

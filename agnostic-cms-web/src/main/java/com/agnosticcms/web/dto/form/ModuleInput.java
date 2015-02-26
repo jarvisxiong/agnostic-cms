@@ -5,7 +5,7 @@ import java.util.Map;
 public class ModuleInput {
 
 	private Map<Long, Long> lovValues;
-	private Map<Long, Object> columnValues;
+	private Map<Long, String> columnValues;
 	
 	
 	public Map<Long, Long> getLovValues() {
@@ -14,10 +14,10 @@ public class ModuleInput {
 	public void setLovValues(Map<Long, Long> lovValues) {
 		this.lovValues = lovValues;
 	}
-	public Map<Long, Object> getColumnValues() {
+	public Map<Long, String> getColumnValues() {
 		return columnValues;
 	}
-	public void setColumnValues(Map<Long, Object> columnValues) {
+	public void setColumnValues(Map<Long, String> columnValues) {
 		this.columnValues = columnValues;
 	}
 	

@@ -3,7 +3,6 @@ package com.agnosticcms.web.dao;
 import static org.jooq.impl.DSL.table;
 import static org.jooq.impl.DSL.field;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
