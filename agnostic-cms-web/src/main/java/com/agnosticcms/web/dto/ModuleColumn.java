@@ -23,6 +23,17 @@ public class ModuleColumn extends BaseDto {
 	public ModuleColumn(Long id, Long modulesId, String name, String nameInDb, ColumnType type, Integer size, Boolean notNull, String defaultValue,
 			Boolean readOnly, Boolean showInList, Boolean showInEdit, Integer orderNum) {
 		super(id);
+		init(modulesId, name, nameInDb, type, size, notNull, defaultValue, readOnly, showInList, showInEdit, orderNum);
+		
+	}
+	
+	public ModuleColumn(Long modulesId, String name, String nameInDb, ColumnType type, Integer size, Boolean notNull, String defaultValue,
+			Boolean readOnly, Boolean showInList, Boolean showInEdit, Integer orderNum) {
+		init(modulesId, name, nameInDb, type, size, notNull, defaultValue, readOnly, showInList, showInEdit, orderNum);
+	}
+	
+	private void init(Long modulesId, String name, String nameInDb, ColumnType type, Integer size, Boolean notNull, String defaultValue,
+			Boolean readOnly, Boolean showInList, Boolean showInEdit, Integer orderNum) {
 		this.moduleId = modulesId;
 		this.name = name;
 		this.nameInDb = nameInDb;

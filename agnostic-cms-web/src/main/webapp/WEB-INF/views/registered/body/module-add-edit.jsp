@@ -9,11 +9,11 @@
  
 <tiles:insertDefinition name="registered.main">
     <tiles:putAttribute cascade="true" name="body">
-    	<h1><spring:message code="module.add.title" /> ${module.title}</h1>
+    	<h1><spring:message code="${editMode ? 'module.edit.title' : 'module.add.title'}" /> ${module.title}</h1>
 		<form:form method="POST" action="" commandName="moduleInput">
 			<c:forEach var="parentModule" items="${parentModules}" varStatus="loop">
-				<c:set var="inputId" value="lov-input-${parentModule.id}" />
-				<c:set var="path" value="lovValues[${parentModule.id}]" />
+				<c:set var="inputId" value="lov-input-${loop.index}" />
+				<c:set var="path" value="lovValues[${loop.index}]" />
 				<c:set var="errorClass" value="${errorScope.hasFieldErrors(path) ? ' has-error' : ''}" />
 
 				<div class="form-group${errorClass}">
@@ -32,31 +32,34 @@
 				</div>
 			</c:forEach>
 			<c:forEach var="column" items="${columns}">
-				<c:set var="inputId" value="input-${column.id}" />
-				<c:set var="path" value="columnValues[${column.id}]" />
-				<c:set var="errorClass" value="${errorScope.hasFieldErrors(path) ? ' has-error' : ''}" />
-				
-				<c:choose>
-					<c:when test="${column.type == 'STRING' or column.type == 'LONG' or column.type == 'INT'}">
-						<div class="form-group${errorClass}">
-							<label class="control-label" for="${inputId}">${column.name}</label>
-							<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
-							<form:input path="${path}" cssClass="form-control" id="${inputId}" />
-						</div>
-					</c:when>
-					<c:when test="${column.type == 'BOOL'}">
-						<div class="${errorClass}">
-							<div class="checkbox">
+			
+				<c:if test="${!editMode or column.showInEdit}">
+					<c:set var="inputId" value="input-${column.id}" />
+					<c:set var="path" value="columnValues[${column.id}]" />
+					<c:set var="errorClass" value="${errorScope.hasFieldErrors(path) ? ' has-error' : ''}" />
+					
+					<c:choose>
+						<c:when test="${column.type == 'STRING' or column.type == 'LONG' or column.type == 'INT'}">
+							<div class="form-group${errorClass}">
+								<label class="control-label" for="${inputId}">${column.name}</label>
 								<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
-								<label for="${inputId}">
-									<form:checkbox value="true" path="${path}" id="${inputId}" />
-									${column.name}
-								</label>
+								<form:input path="${path}" cssClass="form-control" id="${inputId}" />
 							</div>
-						</div>
-					</c:when>
-					<c:otherwise>undefined</c:otherwise>
-				</c:choose>
+						</c:when>
+						<c:when test="${column.type == 'BOOL'}">
+							<div class="${errorClass}">
+								<div class="checkbox">
+									<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
+									<label for="${inputId}">
+										<form:checkbox value="true" path="${path}" id="${inputId}" />
+										${column.name}
+									</label>
+								</div>
+							</div>
+						</c:when>
+						<c:otherwise>undefined</c:otherwise>
+					</c:choose>
+				</c:if>
 			</c:forEach>
 			<button type="submit" class="btn btn-default pull-right">Save</button>
 		</form:form>

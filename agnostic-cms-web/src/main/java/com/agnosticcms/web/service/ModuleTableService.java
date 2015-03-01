@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.apache.commons.collections4.ListUtils;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import com.agnosticcms.web.dao.ModuleTableDao;
 import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
+import com.agnosticcms.web.dto.form.ModuleInput;
+import com.agnosticcms.web.exception.TypeConversionException;
 
 @Service
 public class ModuleTableService {
@@ -27,9 +31,12 @@ public class ModuleTableService {
 	@Autowired
 	private ModuleDao moduleDao;
 	
+	@Autowired
+	private ColumnTypeService columnTypeService;
+	
 	
 	public Result<Record> getRows(Module module) {
-		return moduleTableDao.getRows(module);
+		return moduleTableDao.getRows(module.getTableName());
 	}
 	
 	private <T> Map<Integer, T> getLov(List<Module> parentModules, List<String> fkNames, LovResultsRetriever<T> resultsRetriever) {
@@ -46,7 +53,7 @@ public class ModuleTableService {
 			ModuleColumn lovColumn = lovColumns.get(parentModule.getLovColumnId());
 			
 			if(lovColumn != null) {
-				lovs.put(i, resultsRetriever.retrieve(tableName, lovColumn, i));
+				lovs.put(i, resultsRetriever.retrieve(tableName, lovColumn, fkNames.get(i)));
 			} else {
 				throw new IllegalArgumentException("No List Of Values column for parent table " + tableName);
 			}
@@ -59,12 +66,19 @@ public class ModuleTableService {
 	
 	public Map<Integer, Map<Long, Object>> getLovs(List<Module> parentModules, List<String> fkNames, Result<Record> moduleTableRecords) {
 		
-		return getLov(parentModules, fkNames, (String tableName, ModuleColumn lovColumn, Integer index) -> {
-			final Set<Long> parentRowIds = moduleTableRecords.intoSet(fkNames.get(index), Long.class);
+		return getLov(parentModules, fkNames, (String tableName, ModuleColumn lovColumn, String fkName) -> {
+			final Set<Long> parentRowIds = moduleTableRecords.intoSet(fkName, Long.class);
 			// remove null for row that do not have association with particular parent enabled
 			parentRowIds.remove(null);
 
-			return moduleTableDao.getSingleFieldValueMap(tableName, lovColumn.getNameInDb(), parentRowIds);
+			return moduleTableDao.getSingleFieldValuesMap(tableName, lovColumn.getNameInDb(), parentRowIds);
+		});
+	}
+	
+	public Map<Integer, Object> getLovsSingleValue(List<Module> parentModules, Record moduleRow) {
+		
+		return getLov(parentModules, getForeignKeyNames(parentModules), (String tableName, ModuleColumn lovColumn, String fkName) -> {
+			return moduleTableDao.getSingleFieldValue(tableName, lovColumn.getNameInDb(), (Long) moduleRow.getValue(fkName));
 		});
 	}
 	
@@ -72,7 +86,7 @@ public class ModuleTableService {
 		
 		List<String> fkNames = getForeignKeyNames(parentModules);
 		
-		return getLov(parentModules, fkNames, (String tableName, ModuleColumn lovColumn, Integer index) -> {
+		return getLov(parentModules, fkNames, (String tableName, ModuleColumn lovColumn, String fkName) -> {
 			Lov lov = new Lov();
 			lov.setType(lovColumn.getType());
 			lov.setItems(moduleTableDao.getClassifierItems(tableName, lovColumn.getNameInDb()));
@@ -122,8 +136,77 @@ public class ModuleTableService {
 		return foreignKeyId;
 	}
 	
+	public void saveModuleInput(Module module, ModuleInput moduleInput, List<Module> parentModules, List<ModuleColumn> moduleColumns, Long existingRowId) {
+		
+		boolean update = existingRowId != null;
+		
+		Map<Integer, Long> lovValues = moduleInput.getLovValues();
+		Map<Long, String> columnStringValues = moduleInput.getColumnValues();
+		
+		List<String> foreignKeyNames = getForeignKeyNames(parentModules);
+		List<Long> foreignKeyValues = IntStream.range(0, parentModules.size()).boxed().map(i -> lovValues.get(i)).collect(Collectors.toList());
+		
+		List<String> columnNames = new ArrayList<>();
+		List<Object> columnValues = new ArrayList<>();
+		for(ModuleColumn moduleColumn : moduleColumns) {
+			
+			if(!update || moduleColumn.getShowInEdit()) {
+				columnNames.add(moduleColumn.getNameInDb());
+				
+				try {
+					columnValues.add(columnTypeService.parseFromString(columnStringValues.get(moduleColumn.getId()), moduleColumn.getType()));
+				} catch (TypeConversionException e) {
+					throw new RuntimeException("TypeConversionException occured after validation. This should not happen.", e);
+				}
+			}
+			
+		}
+		
+		List<String> fieldNames = ListUtils.union(foreignKeyNames, columnNames);
+		List<Object> fieldValues = ListUtils.union(foreignKeyValues, columnValues);
+		
+		if(update) {
+			moduleTableDao.updateRow(module.getTableName(), existingRowId, fieldNames, fieldValues);
+		} else {
+			moduleTableDao.insertRow(module.getTableName(), fieldNames, fieldValues);
+		}
+		
+	}
+	
+	
+	
+	public ModuleInput getFilledModuleInput(Module module, List<Module> parentModules, List<ModuleColumn> moduleColumns, Long itemId) {
+		List<String> foreignKeyNames = getForeignKeyNames(parentModules);
+		Record row = moduleTableDao.getRow(module.getTableName(), itemId);
+		
+		Map<Integer, Long> lovValues = new HashMap<>();
+		Map<Long, String> columnValues =  new HashMap<>();
+		
+		int i = 0;
+		for(String foreignKeyName : foreignKeyNames) {
+			lovValues.put(i, row.getValue(foreignKeyName, Long.class));
+			i++;
+		}
+		
+		for(ModuleColumn moduleColumn : moduleColumns) {
+			if(moduleColumn.getShowInEdit()) {
+				columnValues.put(moduleColumn.getId(), columnTypeService.parseToString(row.getValue(moduleColumn.getNameInDb()), moduleColumn.getType()));
+			}
+		}
+		
+		return new ModuleInput(lovValues, columnValues);
+	}
+	
+	public Record getRow(Module module, Long id) {
+		return moduleTableDao.getRow(module.getTableName(), id);
+	}
+	
+	public void deleteRow(Module module, Long id) {
+		moduleTableDao.deleteRow(module.getTableName(), id);
+	}
+	
 	@FunctionalInterface
 	private interface LovResultsRetriever<T> {
-		public T retrieve(String tableName, ModuleColumn moduleColumn, Integer index);
+		public T retrieve(String tableName, ModuleColumn moduleColumn, String fkName);
 	}
 }

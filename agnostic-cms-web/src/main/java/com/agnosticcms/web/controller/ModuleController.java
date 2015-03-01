@@ -24,7 +24,8 @@ import com.agnosticcms.web.exception.ResourceNotFoundException;
 import com.agnosticcms.web.service.ModuleService;
 import com.agnosticcms.web.service.ModuleTableService;
 import com.agnosticcms.web.service.SessionService;
-import com.agnosticcms.web.validation.ModelInputValidator;
+import com.agnosticcms.web.validation.ModuleInputAddValidator;
+import com.agnosticcms.web.validation.ModuleInputUpdateValidator;
 
 @Controller
 @RequestMapping("module")
@@ -40,12 +41,15 @@ public class ModuleController extends RegisteredController {
 	private ModuleTableService moduleTableService;
 	
 	@Autowired
-	private ModelInputValidator validatableModelInputValidator;
+	private ModuleInputAddValidator moduleInputAddValidator;
 	
-	@RequestMapping("/view/{id}")
-	public String view(@PathVariable("id") Long moduleId, Model model) {
+	@Autowired
+	private ModuleInputUpdateValidator moduleInputUpdateValidator;
+	
+	@RequestMapping("/view/{moduleId}")
+	public String view(@PathVariable Long moduleId, Model model) {
 		
-		Module module = getModule(moduleId);
+		Module module = selectModule(moduleId, model);
 		
 		List<Module> parentModules = moduleService.getParentModules(moduleId);
 		List<ModuleColumn> columns = moduleService.getModuleColumns(moduleId);
@@ -60,14 +64,41 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("rows", rawRows.intoMaps());
 		model.addAttribute("foreignKeyNames", foreignKeyNames);
 		model.addAttribute("lovs", lovs);
-		model.addAttribute("selectedModuleId", moduleId);
 		return "registered/body/module-view";
 	}
 	
-	@RequestMapping(value = "/add/{id}", method = RequestMethod.GET)
-	public String add(@PathVariable("id") Long moduleId, Model model) {
+	@RequestMapping("/view/{moduleId}/{itemId}")
+	public String viewSingle(@PathVariable Long moduleId, @PathVariable Long itemId, Model model) {
 		
-		Module module = getModule(moduleId);
+		Module module = selectModule(moduleId, model);
+		Record rawRow = selectRow(module, itemId);
+		
+		List<Module> parentModules = moduleService.getParentModules(moduleId);
+		List<ModuleColumn> moduleColumns = moduleService.getModuleColumns(moduleId);
+		Map<Integer, Object> lovItems = moduleTableService.getLovsSingleValue(parentModules, rawRow);
+		
+		model.addAttribute("module", module);
+		model.addAttribute("itemId", itemId);
+		model.addAttribute("row", rawRow.intoMap());
+		model.addAttribute("parentModules", parentModules);
+		model.addAttribute("columns", moduleColumns);
+		model.addAttribute("lovItems", lovItems);
+		return "registered/body/module-view-single";
+	}
+	
+	@RequestMapping("/delete/{moduleId}/{itemId}")
+	public String delete(@PathVariable Long moduleId, @PathVariable Long itemId, Model model) {
+		
+		Module module = selectModule(moduleId, model);
+		moduleTableService.deleteRow(module, itemId);
+		
+		return "redirect:/module/view/" + moduleId;
+	}
+	
+	@RequestMapping(value = "/add/{moduleId}", method = RequestMethod.GET)
+	public String add(@PathVariable Long moduleId, Model model) {
+		
+		Module module = selectModule(moduleId, model);
 		
 		List<Module> parentModules = moduleService.getParentModules(moduleId);
 		List<ModuleColumn> columns = moduleService.getModuleColumns(moduleId);
@@ -80,19 +111,18 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("parentModules", parentModules);
 		model.addAttribute("columns", columns);
 		model.addAttribute("lovs", lovs);
-		model.addAttribute("selectedModuleId", moduleId);
 		model.addAttribute("moduleInput", moduleInput);
-		return "registered/body/module-add";
+		return "registered/body/module-add-edit";
 	}
 	
-	@RequestMapping(value = "/add/{id}", method = RequestMethod.POST)
+	@RequestMapping(value = "/add/{moduleId}", method = RequestMethod.POST)
 	public String saveAdd(
-			@PathVariable("id") Long moduleId, 
+			@PathVariable Long moduleId, 
 			@ModelAttribute ModuleInput moduleInput,
 			Model model,
 			BindingResult result) {
 		
-		Module module = getModule(moduleId);
+		Module module = selectModule(moduleId, model);
 		
 		List<Module> parentModules = moduleService.getParentModules(moduleId);
 		List<ModuleColumn> moduleColumns = moduleService.getModuleColumns(moduleId);
@@ -104,7 +134,7 @@ public class ModuleController extends RegisteredController {
 		validatableModuleInput.setModuleHierarchies(moduleHierarchies);
 
 		
-		validatableModelInputValidator.validate(validatableModuleInput, result);
+		moduleInputAddValidator.validate(validatableModuleInput, result);
 		
 		if(result.hasErrors()) {
 			
@@ -114,23 +144,96 @@ public class ModuleController extends RegisteredController {
 			model.addAttribute("parentModules", parentModules);
 			model.addAttribute("columns", moduleColumns);
 			model.addAttribute("lovs", lovs);
-			model.addAttribute("selectedModuleId", moduleId);
 			model.addAttribute("moduleInput", moduleInput);
-			return "registered/body/module-add";
+			return "registered/body/module-add-edit";
 		} else {
+			moduleTableService.saveModuleInput(module, moduleInput, parentModules, moduleColumns, null);
 			return "redirect:/module/view/" + moduleId;
 		}
 		
 	}
 	
-	private Module getModule(Long id) {
+	@RequestMapping(value = "/edit/{moduleId}/{itemId}", method = RequestMethod.GET)
+	public String edit(@PathVariable Long moduleId, @PathVariable Long itemId, Model model) {
+		
+		Module module = selectModule(moduleId, model);
+		
+		List<Module> parentModules = moduleService.getParentModules(moduleId);
+		List<ModuleColumn> moduleColumns = moduleService.getModuleColumns(moduleId);
+		Map<Integer, Lov> lovs = moduleTableService.getClassifierItems(parentModules);
+		ModuleInput moduleInput = moduleTableService.getFilledModuleInput(module, parentModules, moduleColumns, itemId);
+		
+		model.addAttribute("module", module);
+		model.addAttribute("parentModules", parentModules);
+		model.addAttribute("columns", moduleColumns);
+		model.addAttribute("lovs", lovs);
+		model.addAttribute("moduleInput", moduleInput);
+		model.addAttribute("editMode", true);
+		return "registered/body/module-add-edit";
+	}
+	
+	@RequestMapping(value = "/edit/{moduleId}/{itemId}", method = RequestMethod.POST)
+	public String saveEdit(
+			@PathVariable Long moduleId,
+			@PathVariable Long itemId,
+			@ModelAttribute ModuleInput moduleInput,
+			Model model,
+			BindingResult result) {
+		
+		Module module = selectModule(moduleId, model);
+		
+		List<Module> parentModules = moduleService.getParentModules(moduleId);
+		List<ModuleColumn> moduleColumns = moduleService.getModuleColumns(moduleId);
+		List<ModuleHierarchy> moduleHierarchies = moduleService.getModuleHierarchies(moduleId);
+		
+		ValidatableModuleInput validatableModuleInput = new ValidatableModuleInput();
+		validatableModuleInput.setModuleInput(moduleInput);
+		validatableModuleInput.setModuleColumns(moduleColumns);
+		validatableModuleInput.setModuleHierarchies(moduleHierarchies);
+
+		
+		moduleInputUpdateValidator.validate(validatableModuleInput, result);
+		
+		if(result.hasErrors()) {
+			
+			Map<Integer, Lov> lovs = moduleTableService.getClassifierItems(parentModules);
+			
+			model.addAttribute("module", module);
+			model.addAttribute("parentModules", parentModules);
+			model.addAttribute("columns", moduleColumns);
+			model.addAttribute("lovs", lovs);
+			model.addAttribute("moduleInput", moduleInput);
+			model.addAttribute("editMode", true);
+			return "registered/body/module-add-edit";
+		} else {
+			moduleTableService.saveModuleInput(module, moduleInput, parentModules, moduleColumns, itemId);
+			return "redirect:/module/view/" + moduleId;
+		}
+		
+	}
+	
+	private Module selectModule(Long id, Model model) {
 		Module module =  moduleService.getModule(id);
 		
 		if(module == null) {
 			throw new ResourceNotFoundException();
 		}
 		
+		model.addAttribute("selectedModuleId", id);
+		
 		return module;
 	}
+	
+	private Record selectRow(Module module, Long itemId) {
+		Record rawRow = moduleTableService.getRow(module, itemId);
+		
+		if(rawRow == null) {
+			throw new ResourceNotFoundException();
+		}
+		
+		return rawRow;
+	}
+	
+	
 
 }

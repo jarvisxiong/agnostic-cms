@@ -12,6 +12,14 @@ public class ModuleHierarchy extends BaseDto {
 
 	public ModuleHierarchy(Long id, Long moduleId, Long module2Id, Boolean mandatory) {
 		super(id);
+		init(moduleId, module2Id, mandatory);
+	}
+	
+	public ModuleHierarchy(Long moduleId, Long module2Id, Boolean mandatory) {
+		init(moduleId, module2Id, mandatory);
+	}
+	
+	private void init(Long moduleId, Long module2Id, Boolean mandatory) {
 		this.moduleId = moduleId;
 		this.module2Id = module2Id;
 		this.mandatory = mandatory;

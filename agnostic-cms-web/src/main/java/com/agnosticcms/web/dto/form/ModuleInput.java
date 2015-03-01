@@ -4,14 +4,22 @@ import java.util.Map;
 
 public class ModuleInput {
 
-	private Map<Long, Long> lovValues;
+	private Map<Integer, Long> lovValues;
 	private Map<Long, String> columnValues;
 	
 	
-	public Map<Long, Long> getLovValues() {
+	public ModuleInput() {
+	}
+
+	public ModuleInput(Map<Integer, Long> lovValues, Map<Long, String> columnValues) {
+		this.lovValues = lovValues;
+		this.columnValues = columnValues;
+	}
+	
+	public Map<Integer, Long> getLovValues() {
 		return lovValues;
 	}
-	public void setLovValues(Map<Long, Long> lovValues) {
+	public void setLovValues(Map<Integer, Long> lovValues) {
 		this.lovValues = lovValues;
 	}
 	public Map<Long, String> getColumnValues() {

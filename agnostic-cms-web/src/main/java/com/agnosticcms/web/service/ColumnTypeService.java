@@ -31,7 +31,7 @@ public class ColumnTypeService {
 	}
 	
 	private Boolean parseBoolean(String value) {
-		return value == "true";
+		return "true".equals(value);
 	}
 	
 	private Integer parseInt(String value) throws TypeConversionException {
@@ -48,6 +48,25 @@ public class ColumnTypeService {
 			return Long.valueOf(value);
 		} catch(NumberFormatException e) {
 			throw new TypeConversionException("Failed to convert string to Long", e);
+		}
+	}
+	
+	public String parseToString(Object value, ColumnType columnType) {
+		
+		if(value == null) {
+			return null;
+		}
+		
+		switch (columnType) {
+		case BOOL:
+			return ((Boolean) value) ? "true" : "false";
+		case INT:
+		case LONG:
+			return value.toString();
+		case STRING:
+			return (String) value;
+		default:
+			throw new IllegalArgumentException("Unsupported column type " + columnType);
 		}
 		
 	}

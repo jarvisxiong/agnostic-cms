@@ -16,6 +16,14 @@ public class Module extends BaseDto {
 
 	public Module(Long id, String name, String title, String tableName, Boolean ordered, Boolean activated, Long lovColumnId, Long orderNum) {
 		super(id);
+		init(name, title, tableName, ordered, activated, lovColumnId, orderNum);
+	}
+	
+	public Module(String name, String title, String tableName, Boolean ordered, Boolean activated, Long lovColumnId, Long orderNum) {
+		init(name, title, tableName, ordered, activated, lovColumnId, orderNum);
+	}
+	
+	private void init(String name, String title, String tableName, Boolean ordered, Boolean activated, Long lovColumnId, Long orderNum) {
 		this.name = name;
 		this.title = title;
 		this.tableName = tableName;

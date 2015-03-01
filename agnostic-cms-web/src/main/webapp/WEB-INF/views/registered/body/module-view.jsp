@@ -27,6 +27,13 @@
 			</thead>
 			<tbody>
 				<c:forEach var="row" items="${rows}">
+				
+					<c:set var="rowId" value="${row['id']}" />
+				
+					<spring:url var="viewUrl" value="/module/view/${module.id}/${rowId}" htmlEscape="true" />
+					<spring:url var="editUrl" value="/module/edit/${module.id}/${rowId}" htmlEscape="true" />
+					<spring:url var="deleteUrl" value="/module/delete/${module.id}/${rowId}" htmlEscape="true" />
+				
 					<tr>
 						<c:forEach var="foreignKeyName" items="${foreignKeyNames}" varStatus="loop">
 							<td>${lovs[loop.index][row[foreignKeyName]]}</td>
@@ -37,9 +44,9 @@
 							</c:if>
 						</c:forEach>
 						
-						<td><a href="#"><spring:message code="module.view.view" /></a></td>
-						<td><a href="#"><spring:message code="module.view.edit" /></a></td>
-						<td><a href="#"><spring:message code="module.view.remove" /></a></td>
+						<td><a href="${viewUrl}"><spring:message code="module.view.view" /></a></td>
+						<td><a href="${editUrl}"><spring:message code="module.view.edit" /></a></td>
+						<td><a href="${deleteUrl}"><spring:message code="module.view.remove" /></a></td>
 					</tr>
 				</c:forEach>
 			</tbody>

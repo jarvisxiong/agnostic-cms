@@ -10,9 +10,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
-import org.jooq.InsertValuesStep12;
-import org.jooq.InsertValuesStep4;
-import org.jooq.InsertValuesStep8;
+import org.jooq.InsertValuesStep11;
+import org.jooq.InsertValuesStep3;
+import org.jooq.InsertValuesStep7;
 import org.jooq.Query;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
@@ -31,22 +31,22 @@ public class ModuleDao {
 	private DSLContext dslContext;
 	
 	public void insertModules(Collection<Module> modules) {
-		this.<Module, InsertValuesStep8<Record, ?, ?, ?, ?, ?, ?, ?, ?>>executeInsertBatch(modules, module -> {
+		this.<Module, InsertValuesStep7<Record, ?, ?, ?, ?, ?, ?, ?>>executeInsertBatch(modules, module -> {
 			return dslContext.insertInto(
-					table(SchemaDao.TABLE_NAME_CMS_MODULES), field("id"), field("name"), field("title"), field("table_name"), field("ordered"),
+					table(SchemaDao.TABLE_NAME_CMS_MODULES), field("name"), field("title"), field("table_name"), field("ordered"),
 							field("activated"), field("cms_module_column_id"), field("order_num"))
-					.values(module.getId(), module.getName(), module.getTitle(), module.getTableName(), module.getOrdered(), module.getOrdered(),
+					.values(module.getName(), module.getTitle(), module.getTableName(), module.getOrdered(), module.getOrdered(),
 							module.getLovColumnId(), module.getOrderNum()
 				);
 		});
 	}
 	
 	public void insertModuleColumns(Collection<ModuleColumn> moduleColumns) {
-		this.<ModuleColumn, InsertValuesStep12<Record, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>>executeInsertBatch(moduleColumns, moduleColumn -> {
+		this.<ModuleColumn, InsertValuesStep11<Record, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>>executeInsertBatch(moduleColumns, moduleColumn -> {
 			return dslContext.insertInto(
-					table(SchemaDao.TABLE_NAME_CMS_MODULE_COLUMNS), field("id"), field("cms_module_id"), field("name"), field("name_in_db"), field("type"),
+					table(SchemaDao.TABLE_NAME_CMS_MODULE_COLUMNS), field("cms_module_id"), field("name"), field("name_in_db"), field("type"),
 							field("size"), field("not_null"), field("default_value"), field("read_only"), field("show_in_list"), field("show_in_edit"), field("order_num"))
-					.values(moduleColumn.getId(), moduleColumn.getModuleId(), moduleColumn.getName(), moduleColumn.getNameInDb(), moduleColumn.getType(),
+					.values(moduleColumn.getModuleId(), moduleColumn.getName(), moduleColumn.getNameInDb(), moduleColumn.getType(),
 							moduleColumn.getSize(), moduleColumn.getNotNull(), moduleColumn.getDefaultValue(), moduleColumn.getReadOnly(),
 							moduleColumn.getShowInEdit(), moduleColumn.getShowInEdit(), moduleColumn.getOrderNum()
 				);
@@ -54,10 +54,10 @@ public class ModuleDao {
 	}
 	
 	public void insertModuleHierarchies(Collection<ModuleHierarchy> moduleHierarchies) {
-		this.<ModuleHierarchy, InsertValuesStep4<Record, ?, ?, ?, ?>>executeInsertBatch(moduleHierarchies, moduleHierarchy -> {
+		this.<ModuleHierarchy, InsertValuesStep3<Record, ?, ?, ?>>executeInsertBatch(moduleHierarchies, moduleHierarchy -> {
 			return dslContext.insertInto(
-					table(SchemaDao.TABLE_NAME_CMS_MODULE_HIERARCHY), field("id"), field("cms_module_id"), field("cms_module2_id"), field("mandatory"))
-					.values(moduleHierarchy.getId(), moduleHierarchy.getModuleId(), moduleHierarchy.getModule2Id(), moduleHierarchy.getMandatory());
+					table(SchemaDao.TABLE_NAME_CMS_MODULE_HIERARCHY), field("cms_module_id"), field("cms_module2_id"), field("mandatory"))
+					.values(moduleHierarchy.getModuleId(), moduleHierarchy.getModule2Id(), moduleHierarchy.getMandatory());
 		});
 	}
 	
@@ -66,8 +66,10 @@ public class ModuleDao {
 	}
 	
 	public Module getModule(Long id) {
-		return dslContext.selectFrom(table(SchemaDao.TABLE_NAME_CMS_MODULES))
-				.where(field("id").equal(id)).fetchOne().map(new ModuleRecordMapper());
+		Record row = dslContext.selectFrom(table(SchemaDao.TABLE_NAME_CMS_MODULES))
+				.where(field("id").equal(id)).fetchOne();
+		
+		return row == null ? null : row.map(new ModuleRecordMapper());
 	}
 	
 	public List<ModuleColumn> getModuleColumns(Long moduleId) {

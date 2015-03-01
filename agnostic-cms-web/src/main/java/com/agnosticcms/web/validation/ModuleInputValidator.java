@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -16,8 +15,7 @@ import com.agnosticcms.web.dto.form.ValidatableModuleInput;
 import com.agnosticcms.web.exception.TypeConversionException;
 import com.agnosticcms.web.service.ColumnTypeService;
 
-@Component
-public class ModelInputValidator implements Validator {
+public abstract class ModuleInputValidator implements Validator {
 
 	private static final String CODE_REQUIRED = "validation.required";
 	private static final String CODE_INVALID_VALUE = "validation.value.invalid";
@@ -38,73 +36,80 @@ public class ModelInputValidator implements Validator {
 		ValidatableModuleInput validatableModuleInput = (ValidatableModuleInput) target;
 		ModuleInput moduleInput = validatableModuleInput.getModuleInput();
 		
-		Map<Long, Long> lovValues = moduleInput.getLovValues();
+		Map<Integer, Long> lovValues = moduleInput.getLovValues();
+		int i = 0;
 		for(ModuleHierarchy moduleHierarchy : validatableModuleInput.getModuleHierarchies()) {
 			if(moduleHierarchy.getMandatory()) {
-				Long parentModuleId = moduleHierarchy.getModuleId();
-				Long value = lovValues.get(parentModuleId);
+				Long value = lovValues.get(i);
 				if(value == null) {
-					errors.rejectValue(getLovValuesFieldName(parentModuleId), CODE_REQUIRED);
+					errors.rejectValue(getLovValuesFieldName(i), CODE_REQUIRED);
 				}
 			}
+			
+			i++;
 		}
 		
 		Map<Long, String> columnValues = moduleInput.getColumnValues();
 		for(ModuleColumn moduleColumn : validatableModuleInput.getModuleColumns()) {
-			Long columnId = moduleColumn.getId();
-			ColumnType columnType = moduleColumn.getType();
-			String value = columnValues.get(columnId);
-			String fieldName = getColumnValuesFieldName(columnId);
 			
-			if(StringUtils.isEmpty(value) && columnType != ColumnType.BOOL) {
-				if(moduleColumn.getNotNull()) {
-					errors.rejectValue(fieldName, CODE_REQUIRED);
-				}
-			} else {
+			if(isColumnProcessable(moduleColumn)) {
+				Long columnId = moduleColumn.getId();
+				ColumnType columnType = moduleColumn.getType();
+				String value = columnValues.get(columnId);
+				String fieldName = getColumnValuesFieldName(columnId);
 				
-				Object convertedValue;
-				
-				try {
-					convertedValue = columnTypeService.parseFromString(value, columnType);
-				} catch (TypeConversionException e) {
-					
-					String errorCode;
-					
-					switch (columnType) {
-					case INT:
-					case LONG:
-						errorCode = CODE_INVALID_NUMBER;
-						break;
-					default:
-						errorCode = CODE_INVALID_VALUE;
+				if(StringUtils.isEmpty(value) && columnType != ColumnType.BOOL) {
+					if(moduleColumn.getNotNull()) {
+						errors.rejectValue(fieldName, CODE_REQUIRED);
 					}
+				} else {
 					
-					errors.rejectValue(fieldName, errorCode);
-					continue;
-				}
-				
-				
-				switch (columnType) {
-				case STRING:
+					Object convertedValue;
 					
-					Integer size = moduleColumn.getSize();
-					
-					if(size != null && size < ((String) convertedValue).length()) {
-						errors.rejectValue(fieldName, CODE_TOO_LONG, new Object[] {size}, null);
+					try {
+						convertedValue = columnTypeService.parseFromString(value, columnType);
+					} catch (TypeConversionException e) {
+						
+						String errorCode;
+						
+						switch (columnType) {
+						case INT:
+						case LONG:
+							errorCode = CODE_INVALID_NUMBER;
+							break;
+						default:
+							errorCode = CODE_INVALID_VALUE;
+						}
+						
+						errors.rejectValue(fieldName, errorCode);
 						continue;
 					}
-					break;
-				default:
+					
+					
+					switch (columnType) {
+					case STRING:
+						
+						Integer size = moduleColumn.getSize();
+						
+						if(size != null && size < ((String) convertedValue).length()) {
+							errors.rejectValue(fieldName, CODE_TOO_LONG, new Object[] {size}, null);
+							continue;
+						}
+						break;
+					default:
+					}
+					
 				}
-				
 			}
+			
+			
 		}
 		
 	}
 	
+	protected abstract boolean isColumnProcessable(ModuleColumn moduleColumn);
 	
-	
-	private String getLovValuesFieldName(Long id) {
+	private String getLovValuesFieldName(Integer id) {
 		return getFieldName("lovValues", id);
 	}
 	
@@ -112,7 +117,7 @@ public class ModelInputValidator implements Validator {
 		return getFieldName("columnValues", id);
 	}
 	
-	private String getFieldName(String baseName, Long id) {
+	private String getFieldName(String baseName, Number id) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(baseName);
 		sb.append("[");

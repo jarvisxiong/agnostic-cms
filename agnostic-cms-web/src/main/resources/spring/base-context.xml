@@ -21,7 +21,7 @@
 	<context:annotation-config />
 	
 	<mvc:resources mapping="/resources/**" location="/resources/" />
-	<mvc:annotation-driven />
+	<mvc:annotation-driven ignore-default-model-on-redirect="true" />
 
 	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix">
