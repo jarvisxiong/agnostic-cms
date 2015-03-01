@@ -4,9 +4,9 @@
 <tiles:insertDefinition name="nonregistered.main">
     <tiles:putAttribute name="content">
     	<div class="container">
-			<h4>
-				<spring:message code="${messageCode}" />
-			</h4>
+			<h1>
+				<spring:message code="resource.notfound" />
+			</h1>
 		</div>
     </tiles:putAttribute>
 </tiles:insertDefinition>

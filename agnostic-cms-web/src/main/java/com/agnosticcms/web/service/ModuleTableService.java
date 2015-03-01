@@ -12,6 +12,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.agnosticcms.web.dao.ModuleDao;
@@ -20,6 +21,7 @@ import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
 import com.agnosticcms.web.dto.form.ModuleInput;
+import com.agnosticcms.web.exception.ForeignKeyIntegrityException;
 import com.agnosticcms.web.exception.TypeConversionException;
 
 @Service
@@ -202,7 +204,12 @@ public class ModuleTableService {
 	}
 	
 	public void deleteRow(Module module, Long id) {
-		moduleTableDao.deleteRow(module.getTableName(), id);
+		try {
+			moduleTableDao.deleteRow(module.getTableName(), id);
+		} catch (DataIntegrityViolationException e) {
+			throw new ForeignKeyIntegrityException(e);
+		}
+		
 	}
 	
 	@FunctionalInterface
