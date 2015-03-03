@@ -17,9 +17,11 @@ import org.springframework.stereotype.Service;
 
 import com.agnosticcms.web.dao.ModuleDao;
 import com.agnosticcms.web.dao.ModuleTableDao;
+import com.agnosticcms.web.dao.SchemaDao;
 import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
+import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.dto.form.ModuleInput;
 import com.agnosticcms.web.exception.ForeignKeyIntegrityException;
 import com.agnosticcms.web.exception.TypeConversionException;
@@ -35,6 +37,9 @@ public class ModuleTableService {
 	
 	@Autowired
 	private ColumnTypeService columnTypeService;
+	
+	@Autowired
+	private SchemaDao schemaDao;
 	
 	
 	public Result<Record> getRows(Module module) {
@@ -79,14 +84,14 @@ public class ModuleTableService {
 	
 	public Map<Integer, Object> getLovsSingleValue(List<Module> parentModules, Record moduleRow) {
 		
-		return getLov(parentModules, getForeignKeyNames(parentModules), (String tableName, ModuleColumn lovColumn, String fkName) -> {
+		return getLov(parentModules, getForeignKeyColumnNames(parentModules), (String tableName, ModuleColumn lovColumn, String fkName) -> {
 			return moduleTableDao.getSingleFieldValue(tableName, lovColumn.getNameInDb(), (Long) moduleRow.getValue(fkName));
 		});
 	}
 	
 	public Map<Integer, Lov> getClassifierItems(List<Module> parentModules) {
 		
-		List<String> fkNames = getForeignKeyNames(parentModules);
+		List<String> fkNames = getForeignKeyColumnNames(parentModules);
 		
 		return getLov(parentModules, fkNames, (String tableName, ModuleColumn lovColumn, String fkName) -> {
 			Lov lov = new Lov();
@@ -96,48 +101,6 @@ public class ModuleTableService {
 		});
 	}
 	
-	public List<String> getForeignKeyNames(List<Module> parentModules) {
-		
-		Map<String, Integer> tableNameCountMap = new HashMap<>();
-		List<String> fkNames = new ArrayList<>();
-		
-		for(Module parentModule : parentModules) {
-			String tableName = parentModule.getTableName();
-			Integer tableNameCount = tableNameCountMap.get(tableName);
-			
-			tableNameCount = (tableNameCount == null) ? 1 : tableNameCount + 1;
-			tableNameCountMap.put(tableName, tableNameCount);
-			
-			if(tableNameCount > 1) {
-				// TODO this should be brought to view someday
-				parentModule.setName(parentModule.getName() + " " + tableNameCount);
-			}
-			
-			fkNames.add(getForeignKeyId(tableName, tableNameCount));
-		}
-		
-		return fkNames;
-	}
-	
-	private String getForeignKeyId(String tableName, Integer tableNameCount) {
-		
-		String foreignKeyId;
-		
-		if(tableName.endsWith("s")) {
-			foreignKeyId = tableName.substring(0, tableName.length() - 1);
-		} else {
-			throw new IllegalArgumentException("Unable to singularize table name " + tableName);
-		}
-		
-		if(tableNameCount > 1) {
-			foreignKeyId += tableNameCount;
-		}
-		
-		foreignKeyId += "_id";
-		
-		return foreignKeyId;
-	}
-	
 	public void saveModuleInput(Module module, ModuleInput moduleInput, List<Module> parentModules, List<ModuleColumn> moduleColumns, Long existingRowId) {
 		
 		boolean update = existingRowId != null;
@@ -145,7 +108,7 @@ public class ModuleTableService {
 		Map<Integer, Long> lovValues = moduleInput.getLovValues();
 		Map<Long, String> columnStringValues = moduleInput.getColumnValues();
 		
-		List<String> foreignKeyNames = getForeignKeyNames(parentModules);
+		List<String> foreignKeyNames = getForeignKeyColumnNames(parentModules);
 		List<Long> foreignKeyValues = IntStream.range(0, parentModules.size()).boxed().map(i -> lovValues.get(i)).collect(Collectors.toList());
 		
 		List<String> columnNames = new ArrayList<>();
@@ -178,7 +141,7 @@ public class ModuleTableService {
 	
 	
 	public ModuleInput getFilledModuleInput(Module module, List<Module> parentModules, List<ModuleColumn> moduleColumns, Long itemId) {
-		List<String> foreignKeyNames = getForeignKeyNames(parentModules);
+		List<String> foreignKeyNames = getForeignKeyColumnNames(parentModules);
 		Record row = moduleTableDao.getRow(module.getTableName(), itemId);
 		
 		Map<Integer, Long> lovValues = new HashMap<>();
@@ -199,6 +162,10 @@ public class ModuleTableService {
 		return new ModuleInput(lovValues, columnValues);
 	}
 	
+	public List<String> getForeignKeyColumnNames(List<Module> parentModules) {
+		return schemaDao.getForeignKeyColumnNames(parentModules);
+	}
+	
 	public Record getRow(Module module, Long id) {
 		return moduleTableDao.getRow(module.getTableName(), id);
 	}
@@ -210,6 +177,29 @@ public class ModuleTableService {
 			throw new ForeignKeyIntegrityException(e);
 		}
 		
+	}
+	
+	public void activate(Module module) {
+		if(module.getActivated()) {
+			return;
+		}
+		
+		Long moduleId = module.getId();
+		List<ModuleColumn> moduleColumns = moduleDao.getModuleColumns(moduleId);
+		List<Module> parentModules = moduleDao.getParentModules(moduleId);
+		List<ModuleHierarchy> moduleHierarchies = moduleDao.getModuleHierarchies(moduleId);
+		
+		schemaDao.createOrUpdateModuleSchema(module, parentModules, moduleColumns, moduleHierarchies);
+		
+		moduleDao.setActivated(moduleId, true);
+	}
+
+	public void deactivate(Module module) {
+		if(!module.getActivated()) {
+			return;
+		}
+		
+		moduleDao.setActivated(module.getId(), false);
 	}
 	
 	@FunctionalInterface

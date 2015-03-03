@@ -51,8 +51,9 @@
 				</c:forEach>
 			</tbody>
 		</table>
+		
 		<div class="pull-right">
-			<a class="btn btn-default" href="${addUrl}" role="button">Add</a>
+			<a class="btn btn-default" href="${addUrl}" role="button"><spring:message code="module.add.button" /></a>
 		</div>
     </tiles:putAttribute>
 </tiles:insertDefinition>

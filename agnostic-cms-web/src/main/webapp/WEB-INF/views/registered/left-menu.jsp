@@ -8,11 +8,13 @@
 		<a href="${homeUrl}">Home</a>
 	</li>
 	<c:forEach var="module" items="${modules}">
-		<spring:url value="/module/view/${module.id}" var="url" htmlEscape="true" />
-		<li class="${selectedModuleId ==  module.id ? 'active' : ''}">
-			<a href="${url}">
-				${module.name}
-			</a>
-		</li>
+		<c:if test="${module.activated}">
+			<spring:url value="/module/view/${module.id}" var="url" htmlEscape="true" />
+			<li class="${selectedModuleId ==  module.id ? 'active' : ''}">
+				<a href="${url}">
+					${module.name}
+				</a>
+			</li>
+		</c:if>
 	</c:forEach>
 </ul>

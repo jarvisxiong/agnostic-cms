@@ -21,6 +21,16 @@
 			</c:forEach>
 		</dl>
 		
+		<c:if test="${activable}">
+			<c:set var="activated" value="${row['activated']}" />
+		
+			<div class="pull-left">
+				<spring:url var="activationToggleUrl" value="/module/activation/${itemId}/${not activated}" />
+				<a class="btn btn-danger" href="${activationToggleUrl}" role="button">
+					<spring:message code="module.activation.${activated ? 'deactivate' : 'activate'}" />
+				</a>
+			</div>
+		</c:if>
 		<a role="button" href="${editUrl}" class="btn btn-default pull-right">Edit</a>
     </tiles:putAttribute>
 </tiles:insertDefinition>

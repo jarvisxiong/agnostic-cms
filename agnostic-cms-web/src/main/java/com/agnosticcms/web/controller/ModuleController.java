@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.agnosticcms.web.dto.CmsTables;
 import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
@@ -54,8 +55,7 @@ public class ModuleController extends RegisteredController {
 		List<Module> parentModules = moduleService.getParentModules(moduleId);
 		List<ModuleColumn> columns = moduleService.getModuleColumns(moduleId);
 		Result<Record> rawRows = moduleTableService.getRows(module);
-		List<String> foreignKeyNames = moduleTableService.getForeignKeyNames(parentModules);
-		// 'list of values'
+		List<String> foreignKeyNames = moduleTableService.getForeignKeyColumnNames(parentModules);
 		Map<Integer, Map<Long, Object>> lovs = moduleTableService.getLovs(parentModules, foreignKeyNames, rawRows);
 		
 		model.addAttribute("module", module);
@@ -83,6 +83,7 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("parentModules", parentModules);
 		model.addAttribute("columns", moduleColumns);
 		model.addAttribute("lovItems", lovItems);
+		model.addAttribute("activable", moduleId == CmsTables.MODULES.getModuleId());
 		return "registered/body/module-view-single";
 	}
 	
@@ -212,6 +213,19 @@ public class ModuleController extends RegisteredController {
 		
 	}
 	
+	@RequestMapping(value = "/activation/{moduleId}/{activate}", method = RequestMethod.GET)
+	public String activation(@PathVariable Long moduleId, @PathVariable Boolean activate) {
+		Module module = selectModule(moduleId);
+		
+		if(activate) {
+			moduleTableService.activate(module);
+		} else {
+			moduleTableService.deactivate(module);
+		}
+
+		return "redirect:/module/view/" + CmsTables.MODULES.getModuleId();
+	}
+	
 	private Module selectModule(Long id, Model model) {
 		Module module =  moduleService.getModule(id);
 		
@@ -219,9 +233,15 @@ public class ModuleController extends RegisteredController {
 			throw new ResourceNotFoundException();
 		}
 		
-		model.addAttribute("selectedModuleId", id);
+		if(model != null) {
+			model.addAttribute("selectedModuleId", id);
+		}
 		
 		return module;
+	}
+	
+	private Module selectModule(Long id) {
+		return selectModule(id, null);
 	}
 	
 	private Record selectRow(Module module, Long itemId) {

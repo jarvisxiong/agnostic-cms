@@ -13,6 +13,7 @@
             <AppenderRef ref="Console" />
             <AppenderRef ref="MyFile"/>
         </Root>
-        <Logger name="org.jooq" level="debug" />
+        <Logger name="com.feedzai" level="debug" />
+        <!-- <Logger name="org.jooq" level="debug" /> -->
     </Loggers>
 </Configuration>

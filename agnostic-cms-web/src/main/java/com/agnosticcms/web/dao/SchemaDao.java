@@ -1,15 +1,30 @@
 package com.agnosticcms.web.dao;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Repository;
 
-
 import com.agnosticcms.web.dbutil.PdbEngineProvider;
+import com.agnosticcms.web.dto.CmsTables;
+import com.agnosticcms.web.dto.ColumnType;
+import com.agnosticcms.web.dto.Module;
+import com.agnosticcms.web.dto.ModuleColumn;
+import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.exception.DaoRuntimeException;
+import com.agnosticcms.web.exception.TypeConversionException;
+import com.agnosticcms.web.service.ColumnTypeService;
 import com.agnosticcms.web.service.CrypService;
+import com.feedzai.commons.sql.abstraction.ddl.DbColumn.Builder;
 import com.feedzai.commons.sql.abstraction.ddl.DbColumnConstraint;
 import com.feedzai.commons.sql.abstraction.ddl.DbColumnType;
 import com.feedzai.commons.sql.abstraction.ddl.DbEntity;
@@ -20,12 +35,6 @@ import com.feedzai.commons.sql.abstraction.engine.DatabaseEngineException;
 
 @Repository
 public class SchemaDao {
-
-	public static final String TABLE_NAME_CMS_USERS = "cms_users";
-	public static final String TABLE_NAME_CMS_SESSIONS = "cms_sessions";
-	public static final String TABLE_NAME_CMS_MODULES = "cms_modules";
-	public static final String TABLE_NAME_CMS_MODULE_COLUMNS = "cms_module_columns";
-	public static final String TABLE_NAME_CMS_MODULE_HIERARCHY = "cms_module_hierarchy";
 	
 	@Autowired
 	private PdbEngineProvider pdbEngineProvider;
@@ -36,9 +45,13 @@ public class SchemaDao {
 	@Autowired
 	private DSLContext dslContext;
 	
+	@Autowired
+	private ColumnTypeService columnTypeService;
+	
+	
 	public boolean cmsTablesExist() {
-		return tableExists(TABLE_NAME_CMS_USERS) && tableExists(TABLE_NAME_CMS_SESSIONS) && tableExists(TABLE_NAME_CMS_MODULES)
-				&& tableExists(TABLE_NAME_CMS_MODULE_COLUMNS) && tableExists(TABLE_NAME_CMS_MODULE_HIERARCHY);
+		return tableExists(CmsTables.USERS.getTableName()) && tableExists(CmsTables.SESSIONS.getTableName()) && tableExists(CmsTables.MODULES.getTableName())
+				&& tableExists(CmsTables.MODULE_COLUMNS.getTableName()) && tableExists(CmsTables.MODULE_HIERARCHY.getTableName());
 	}
 
 	public void createCmsUsersTable() {
@@ -61,7 +74,7 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity cmsSessionsTable = SqlBuilder.dbEntity()
-			        .name(TABLE_NAME_CMS_SESSIONS)
+			        .name(CmsTables.SESSIONS.getTableName())
 			        .addColumn(SqlBuilder.dbColumn().name("key").type(DbColumnType.STRING).size(36).addConstraints(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("value").type(DbColumnType.STRING).size(5000).addConstraints(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("expiry").type(DbColumnType.LONG).addConstraints(DbColumnConstraint.NOT_NULL).build())
@@ -81,7 +94,7 @@ public class SchemaDao {
 	
 	private DbEntity getCmsModulesTableDefinition() {
 		return SqlBuilder.dbEntity()
-	        .name(TABLE_NAME_CMS_MODULES)
+	        .name(CmsTables.MODULES.getTableName())
 	        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
 	        .addColumn(SqlBuilder.dbColumn().name("name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(30).build())
 	        .addColumn(SqlBuilder.dbColumn().name("title").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(140).build())
@@ -103,7 +116,7 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity fkUpdate = getCmsModulesTableDefinition().newBuilder().addFk(
-				SqlBuilder.dbFk().addColumn("cms_module_column_id").foreignTable(TABLE_NAME_CMS_MODULE_COLUMNS).addForeignColumn("id")
+				SqlBuilder.dbFk().addColumn("cms_module_column_id").foreignTable(CmsTables.MODULE_COLUMNS.getTableName()).addForeignColumn("id")
 			).build();
 			
 			engine.updateEntity(fkUpdate);
@@ -115,7 +128,7 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity cmsModulesTable = SqlBuilder.dbEntity()
-			        .name(TABLE_NAME_CMS_MODULE_COLUMNS)
+			        .name(CmsTables.MODULE_COLUMNS.getTableName())
 			        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("cms_module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(50).build())
@@ -129,7 +142,7 @@ public class SchemaDao {
 			        .addColumn(SqlBuilder.dbColumn().name("show_in_edit").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .pkFields("id")
-			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
+			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(CmsTables.MODULES.getTableName()).addForeignColumn("id"))
 			        .build();
 			
 			engine.addEntity(cmsModulesTable);
@@ -142,19 +155,142 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity cmsModuleHierarchyTable = SqlBuilder.dbEntity()
-			        .name(TABLE_NAME_CMS_MODULE_HIERARCHY)
+			        .name(CmsTables.MODULE_HIERARCHY.getTableName())
 			        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("cms_module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("cms_module2_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("mandatory").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .pkFields("id")
-			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
-			        .addFk(SqlBuilder.dbFk().addColumn("cms_module2_id").foreignTable(TABLE_NAME_CMS_MODULES).addForeignColumn("id"))
+			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(CmsTables.MODULES.getTableName()).addForeignColumn("id"))
+			        .addFk(SqlBuilder.dbFk().addColumn("cms_module2_id").foreignTable(CmsTables.MODULES.getTableName()).addForeignColumn("id"))
 			        .build();
 			
 			engine.addEntity(cmsModuleHierarchyTable);
 			
 		}, "Unable to create cms module columns table");
+	}
+	
+	public void createOrUpdateModuleSchema(Module module, List<Module> parentModules, List<ModuleColumn> moduleColumns, List<ModuleHierarchy> moduleHierarchies) {
+		
+		execute((engine) -> {
+		
+			DbEntity.Builder tableBuilder = SqlBuilder.dbEntity();
+			tableBuilder.name(module.getTableName());
+			tableBuilder.addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build());
+			tableBuilder.pkFields("id");
+			
+			if(CollectionUtils.isNotEmpty(parentModules)) {
+				Iterator<Module> parentModulesIt = parentModules.iterator();
+				Iterator<String> foreignKeyColumnNamesIt = getForeignKeyColumnNames(parentModules).iterator();
+				
+				while(parentModulesIt.hasNext()) {
+					
+					Module parentModule = parentModulesIt.next();
+					String foreignKeyColumnName = foreignKeyColumnNamesIt.next();
+					
+					tableBuilder.addColumn(SqlBuilder.dbColumn().name(foreignKeyColumnName).type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build());
+					tableBuilder.addFk(SqlBuilder.dbFk().addColumn(foreignKeyColumnName).foreignTable(parentModule.getTableName()).addForeignColumn("id"));
+				}
+			}
+			
+			for(ModuleColumn moduleColumn : moduleColumns) {
+				Builder columnBuilder = SqlBuilder.dbColumn();
+				columnBuilder.name(moduleColumn.getNameInDb());
+				
+				DbColumnType dbColumnType;
+				ColumnType moduleColumnType = moduleColumn.getType();
+				switch (moduleColumnType) {
+				case BOOL:
+					dbColumnType = DbColumnType.BOOLEAN;
+					break;
+				case INT:
+					dbColumnType = DbColumnType.INT;
+					break;
+				case LONG:
+					dbColumnType = DbColumnType.LONG;
+					break;
+				case STRING:
+					dbColumnType = DbColumnType.STRING;
+					
+					Integer size = moduleColumn.getSize();
+					if(size != null) {
+						columnBuilder.size(size);
+					}
+					
+					break;
+				default:
+					throw new DaoRuntimeException("Unsupported module column type " + moduleColumnType);
+				}
+				
+				columnBuilder.type(dbColumnType);
+				
+				if(moduleColumn.getNotNull()) {
+					columnBuilder.addConstraint(DbColumnConstraint.NOT_NULL);
+				}
+				
+				
+				String defaultValueString = moduleColumn.getDefaultValue();
+				if(StringUtils.isNotEmpty(defaultValueString)) {
+					try {
+						Object defaultValue = columnTypeService.parseFromString(moduleColumn.getDefaultValue(), moduleColumnType);
+						columnBuilder.defaultValue(new K(defaultValue));
+					} catch (TypeConversionException e) {
+						throw new DaoRuntimeException("Type conversion error during creation of a table", e);
+					}
+				}
+				
+				tableBuilder.addColumn(columnBuilder.build());
+			}
+			
+			if(module.getOrdered()) {
+				tableBuilder.addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).addConstraint(DbColumnConstraint.NOT_NULL).build());
+			}
+		
+			engine.updateEntity(tableBuilder.build());
+			
+		}, "Unable to create schema for module with name " + module.getName());
+	}
+	
+	public List<String> getForeignKeyColumnNames(List<Module> parentModules) {
+		
+		Map<String, Integer> tableNameCountMap = new HashMap<>();
+		List<String> fkNames = new ArrayList<>();
+		
+		for(Module parentModule : parentModules) {
+			String tableName = parentModule.getTableName();
+			Integer tableNameCount = tableNameCountMap.get(tableName);
+			
+			tableNameCount = (tableNameCount == null) ? 1 : tableNameCount + 1;
+			tableNameCountMap.put(tableName, tableNameCount);
+			
+			if(tableNameCount > 1) {
+				// TODO this should be brought to view someday
+				parentModule.setName(parentModule.getName() + " " + tableNameCount);
+			}
+			
+			fkNames.add(getForeignKeyColumnId(tableName, tableNameCount));
+		}
+		
+		return fkNames;
+	}
+	
+	private String getForeignKeyColumnId(String tableName, Integer tableNameCount) {
+		
+		String foreignKeyId;
+		
+		if(tableName.endsWith("s")) {
+			foreignKeyId = tableName.substring(0, tableName.length() - 1);
+		} else {
+			throw new IllegalArgumentException("Unable to singularize table name " + tableName);
+		}
+		
+		if(tableNameCount > 1) {
+			foreignKeyId += tableNameCount;
+		}
+		
+		foreignKeyId += "_id";
+		
+		return foreignKeyId;
 	}
 	
 	public boolean tableExists(String tableName) {

@@ -34,7 +34,7 @@ public class ModuleTableDao {
 		return dslContext
 					.select(field("id"), field(columnName))
 					.from(table(tableName))
-					.where(field("id").in(ids))
+					.where(field("id", Long.class).in(ids))
 					.fetchMap(field("id", Long.class), field(columnName));
 	}
 	
@@ -43,12 +43,12 @@ public class ModuleTableDao {
 		return dslContext
 					.select(field(columnName))
 					.from(table(tableName))
-					.where(field("id").equal(id))
+					.where(field("id", Long.class).equal(id))
 					.fetchAny(columnName);
 	}
 	
 	public void deleteRow(String tableName, Long rowId) {
-		dslContext.delete(table(tableName)).where(field("id").equal(rowId)).execute();
+		dslContext.delete(table(tableName)).where(field("id", Long.class).equal(rowId)).execute();
 	}
 	
 	public List<LovItem> getClassifierItems(String tableName, String columnName) {
