@@ -12,7 +12,7 @@
 	<c:when test="${empty value}">
 		<c:set var="stringifierResult" value="(None)" />
 	</c:when>
-	<c:when test="${type == 'STRING' or type == 'LONG' or type == 'INT'}">
+	<c:when test="${type == 'STRING' or type == 'LONG' or type == 'INT' or type == 'ENUM'}">
 		<c:set var="stringifierResult" value="${value}" />
 	</c:when>
 	<c:when test="${type == 'BOOL'}">

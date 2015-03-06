@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
-import org.jooq.InsertValuesStep11;
+import org.jooq.InsertValuesStep13;
 import org.jooq.InsertValuesStep3;
 import org.jooq.InsertValuesStep7;
 import org.jooq.Query;
@@ -36,20 +36,21 @@ public class ModuleDao {
 			return dslContext.insertInto(
 					table(CmsTables.MODULES.getTableName()), field("name"), field("title"), field("table_name"), field("ordered"),
 							field("activated"), field("cms_module_column_id"), field("order_num"))
-					.values(module.getName(), module.getTitle(), module.getTableName(), module.getOrdered(), module.getOrdered(),
+					.values(module.getName(), module.getTitle(), module.getTableName(), module.getOrdered(), module.getActivated(),
 							module.getLovColumnId(), module.getOrderNum()
 				);
 		});
 	}
 	
 	public void insertModuleColumns(Collection<ModuleColumn> moduleColumns) {
-		this.<ModuleColumn, InsertValuesStep11<Record, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>>executeInsertBatch(moduleColumns, moduleColumn -> {
+		this.<ModuleColumn, InsertValuesStep13<Record, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>>executeInsertBatch(moduleColumns, moduleColumn -> {
 			return dslContext.insertInto(
 					table(CmsTables.MODULE_COLUMNS.getTableName()), field("cms_module_id"), field("name"), field("name_in_db"), field("type"),
-							field("size"), field("not_null"), field("default_value"), field("read_only"), field("show_in_list"), field("show_in_edit"), field("order_num"))
+							field("size"), field("type_info"), field("not_null"), field("default_value"), field("read_only"), field("show_in_list"), field("show_in_edit"),
+							field("show_in_add"), field("order_num"))
 					.values(moduleColumn.getModuleId(), moduleColumn.getName(), moduleColumn.getNameInDb(), moduleColumn.getType(),
-							moduleColumn.getSize(), moduleColumn.getNotNull(), moduleColumn.getDefaultValue(), moduleColumn.getReadOnly(),
-							moduleColumn.getShowInEdit(), moduleColumn.getShowInEdit(), moduleColumn.getOrderNum()
+							moduleColumn.getSize(), moduleColumn.getTypeInfo(), moduleColumn.getNotNull(), moduleColumn.getDefaultValue(), moduleColumn.getReadOnly(),
+							moduleColumn.getShowInList(), moduleColumn.getShowInEdit(), moduleColumn.getShowInAdd(), moduleColumn.getOrderNum()
 				);
 		});
 	}
@@ -74,11 +75,11 @@ public class ModuleDao {
 	}
 	
 	public List<ModuleColumn> getModuleColumns(Long moduleId) {
-		return dslContext.selectFrom(table(CmsTables.MODULE_COLUMNS.getTableName())).where(field("cms_module_id").equal(moduleId)).fetch(new ModuleColumnRecordMapper());
+		return dslContext.selectFrom(table(CmsTables.MODULE_COLUMNS.getTableName())).where(field("cms_module_id", Long.class).equal(moduleId)).fetch(new ModuleColumnRecordMapper());
 	}
 	
 	public Map<Long, ModuleColumn> getColumnsByIds(List<Long> columnIds) {
-		return dslContext.selectFrom(table(CmsTables.MODULE_COLUMNS.getTableName())).where(field("id").in(columnIds)).fetchMap(field("id", Long.class), new ModuleColumnRecordMapper());
+		return dslContext.selectFrom(table(CmsTables.MODULE_COLUMNS.getTableName())).where(field("id", Long.class).in(columnIds)).fetchMap(field("id", Long.class), new ModuleColumnRecordMapper());
 	}
 	
 	public List<Module> getParentModules(Long moduleId) {
@@ -129,8 +130,10 @@ public class ModuleDao {
 		public ModuleColumn map(Record r) {
 			return new ModuleColumn(r.getValue("id", Long.class), r.getValue("cms_module_id", Long.class), r.getValue("name", String.class),
 					r.getValue("name_in_db", String.class), r.getValue("type", ColumnType.class), r.getValue("size", Integer.class),
+					r.getValue("type_info", String.class),
 					r.getValue("not_null", Boolean.class), r.getValue("default_value", String.class), r.getValue("read_only", Boolean.class),
-					r.getValue("show_in_list", Boolean.class), r.getValue("show_in_edit", Boolean.class), r.getValue("order_num", Integer.class));
+					r.getValue("show_in_list", Boolean.class), r.getValue("show_in_edit", Boolean.class), r.getValue("show_in_add", Boolean.class),
+					r.getValue("order_num", Integer.class));
 		}
 		
 	}

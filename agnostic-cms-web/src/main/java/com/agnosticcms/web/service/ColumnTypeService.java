@@ -23,6 +23,7 @@ public class ColumnTypeService {
 		case LONG:
 			return parseLong(value);
 		case STRING:
+		case ENUM:
 			return value;
 		default:
 			throw new IllegalArgumentException("Unsupported column type " + columnType);
@@ -64,6 +65,7 @@ public class ColumnTypeService {
 		case LONG:
 			return value.toString();
 		case STRING:
+		case ENUM:
 			return (String) value;
 		default:
 			throw new IllegalArgumentException("Unsupported column type " + columnType);

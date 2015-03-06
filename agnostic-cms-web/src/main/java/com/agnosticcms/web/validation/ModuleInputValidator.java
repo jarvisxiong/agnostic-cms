@@ -2,6 +2,7 @@ package com.agnosticcms.web.validation;
 
 import java.util.Map;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.Errors;
@@ -96,6 +97,11 @@ public abstract class ModuleInputValidator implements Validator {
 							continue;
 						}
 						break;
+					case ENUM:
+						String[] enumValues = StringUtils.split(moduleColumn.getTypeInfo(), ",");
+						if(!ArrayUtils.contains(enumValues, convertedValue)) {
+							errors.rejectValue(fieldName, CODE_INVALID_VALUE);
+						}
 					default:
 					}
 					

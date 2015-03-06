@@ -1,16 +1,18 @@
 package com.agnosticcms.web.dto;
 
 public class ModuleColumn extends BaseDto {
-
+	
 	private Long moduleId;
 	private String name;
 	private String nameInDb;
 	private ColumnType type;
 	private Integer size;
+	private String typeInfo;
 	private Boolean notNull;
 	private String defaultValue;
 	private Boolean readOnly;
 	private Boolean showInList;
+	private Boolean showInAdd;
 	private Boolean showInEdit;
 	private Integer orderNum;
 	
@@ -20,31 +22,34 @@ public class ModuleColumn extends BaseDto {
 		super();
 	}
 
-	public ModuleColumn(Long id, Long modulesId, String name, String nameInDb, ColumnType type, Integer size, Boolean notNull, String defaultValue,
-			Boolean readOnly, Boolean showInList, Boolean showInEdit, Integer orderNum) {
+	public ModuleColumn(Long id, Long modulesId, String name, String nameInDb, ColumnType type, Integer size, String typeInfo, Boolean notNull, String defaultValue,
+			Boolean readOnly, Boolean showInList, Boolean showInEdit, Boolean showInAdd, Integer orderNum) {
 		super(id);
-		init(modulesId, name, nameInDb, type, size, notNull, defaultValue, readOnly, showInList, showInEdit, orderNum);
+		init(modulesId, name, nameInDb, type, size, typeInfo, notNull, defaultValue, readOnly, showInList, showInEdit, showInAdd, orderNum);
 		
 	}
 	
-	public ModuleColumn(Long modulesId, String name, String nameInDb, ColumnType type, Integer size, Boolean notNull, String defaultValue,
-			Boolean readOnly, Boolean showInList, Boolean showInEdit, Integer orderNum) {
-		init(modulesId, name, nameInDb, type, size, notNull, defaultValue, readOnly, showInList, showInEdit, orderNum);
+	public ModuleColumn(Long modulesId, String name, String nameInDb, ColumnType type, Integer size, String typeInfo, Boolean notNull, String defaultValue,
+			Boolean readOnly, Boolean showInList, Boolean showInEdit, Boolean showInAdd, Integer orderNum) {
+		init(modulesId, name, nameInDb, type, size, typeInfo, notNull, defaultValue, readOnly, showInList, showInEdit, showInAdd, orderNum);
 	}
 	
-	private void init(Long modulesId, String name, String nameInDb, ColumnType type, Integer size, Boolean notNull, String defaultValue,
-			Boolean readOnly, Boolean showInList, Boolean showInEdit, Integer orderNum) {
+	private void init(Long modulesId, String name, String nameInDb, ColumnType type, Integer size, String typeInfo, Boolean notNull, String defaultValue,
+			Boolean readOnly, Boolean showInList, Boolean showInEdit, Boolean showInAdd, Integer orderNum) {
 		this.moduleId = modulesId;
 		this.name = name;
 		this.nameInDb = nameInDb;
 		this.type = type;
 		this.size = size;
+		this.typeInfo = typeInfo;
 		this.notNull = notNull;
 		this.defaultValue = defaultValue;
 		this.readOnly = readOnly;
 		this.showInList = showInList;
 		this.showInEdit = showInEdit;
 		this.orderNum = orderNum;
+		this.showInAdd = showInAdd;
+		
 	}
 	
 	public Long getModuleId() {
@@ -112,6 +117,18 @@ public class ModuleColumn extends BaseDto {
 	}
 	public void setOrderNum(Integer orderNum) {
 		this.orderNum = orderNum;
+	}
+	public Boolean getShowInAdd() {
+		return showInAdd;
+	}
+	public void setShowInAdd(Boolean showInAdd) {
+		this.showInAdd = showInAdd;
+	}
+	public String getTypeInfo() {
+		return typeInfo;
+	}
+	public void setTypeInfo(String typeInfo) {
+		this.typeInfo = typeInfo;
 	}
 	
 }

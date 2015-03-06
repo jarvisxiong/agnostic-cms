@@ -135,11 +135,13 @@ public class SchemaDao {
 			        .addColumn(SqlBuilder.dbColumn().name("name_in_db").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(64).build())
 			        .addColumn(SqlBuilder.dbColumn().name("type").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(20).build())
 			        .addColumn(SqlBuilder.dbColumn().name("size").type(DbColumnType.INT).build())
+			        .addColumn(SqlBuilder.dbColumn().name("type_info").type(DbColumnType.STRING).build())
 			        .addColumn(SqlBuilder.dbColumn().name("not_null").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("default_value").type(DbColumnType.STRING).size(200).build())
 			        .addColumn(SqlBuilder.dbColumn().name("read_only").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("show_in_list").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("show_in_edit").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
+			        .addColumn(SqlBuilder.dbColumn().name("show_in_add").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .pkFields("id")
 			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(CmsTables.MODULES.getTableName()).addForeignColumn("id"))
@@ -218,6 +220,9 @@ public class SchemaDao {
 					}
 					
 					break;
+				case ENUM:
+					dbColumnType = DbColumnType.STRING;
+					break;
 				default:
 					throw new DaoRuntimeException("Unsupported module column type " + moduleColumnType);
 				}
@@ -278,8 +283,11 @@ public class SchemaDao {
 		
 		String foreignKeyId;
 		
-		if(tableName.endsWith("s")) {
-			foreignKeyId = tableName.substring(0, tableName.length() - 1);
+		// TODO re-enable this
+		if(tableName.endsWith("ies")) {
+			foreignKeyId = curFromEnd(tableName, 3) + "y";
+		} else if(tableName.endsWith("s")) {
+			foreignKeyId = curFromEnd(tableName, 1);
 		} else {
 			throw new IllegalArgumentException("Unable to singularize table name " + tableName);
 		}
@@ -291,6 +299,10 @@ public class SchemaDao {
 		foreignKeyId += "_id";
 		
 		return foreignKeyId;
+	}
+	
+	private String curFromEnd(String string, int count) {
+		return string.substring(0, string.length() - count);
 	}
 	
 	public boolean tableExists(String tableName) {

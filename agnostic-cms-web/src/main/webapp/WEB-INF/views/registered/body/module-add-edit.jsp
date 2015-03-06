@@ -1,6 +1,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 
@@ -33,7 +34,7 @@
 			</c:forEach>
 			<c:forEach var="column" items="${columns}">
 			
-				<c:if test="${!editMode or column.showInEdit}">
+				<c:if test="${(editMode and column.showInEdit) or (not editMode and column.showInAdd)}">
 					<c:set var="inputId" value="input-${column.id}" />
 					<c:set var="path" value="columnValues[${column.id}]" />
 					<c:set var="errorClass" value="${errorScope.hasFieldErrors(path) ? ' has-error' : ''}" />
@@ -57,11 +58,21 @@
 								</div>
 							</div>
 						</c:when>
+						<c:when test="${column.type == 'ENUM'}">
+							<div class="form-group${errorClass}">
+								<label class="control-label" for="${inputId}">${column.name}</label>
+								<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
+								<form:select id="${inputId}" path="${path}" cssClass="form-control">
+									<form:option value="" label="" />
+									<form:options items="${fn:split(column.typeInfo, ',')}" />
+								</form:select>
+							</div>
+						</c:when>
 						<c:otherwise>undefined</c:otherwise>
 					</c:choose>
 				</c:if>
 			</c:forEach>
-			<button type="submit" class="btn btn-default pull-right">Save</button>
+			<button type="submit" class="btn btn-default pull-right"><spring:message code="module.add.save" /></button>
 		</form:form>
     </tiles:putAttribute>
 </tiles:insertDefinition>

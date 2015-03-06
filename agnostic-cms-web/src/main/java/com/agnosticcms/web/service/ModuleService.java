@@ -1,12 +1,15 @@
 package com.agnosticcms.web.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.agnosticcms.web.dao.ModuleDao;
+import com.agnosticcms.web.dto.ColumnType;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
 import com.agnosticcms.web.dto.ModuleHierarchy;
@@ -37,6 +40,10 @@ public class ModuleService {
 	
 	public List<ModuleHierarchy> getModuleHierarchies(Long moduleId) {
 		return moduleDao.getModuleHierarchies(moduleId);
+	}
+	
+	public String getAllColumnTypesAsString() {
+		return StringUtils.join(Arrays.stream(ColumnType.values()).map(columnType -> columnType.toString()).collect(Collectors.toList()), ",");
 	}
 	
 	public ModuleInput getDefaultModuleInput(List<ModuleColumn> moduleColumns) {

@@ -23,7 +23,7 @@ import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
 import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.dto.form.ModuleInput;
-import com.agnosticcms.web.exception.ForeignKeyIntegrityException;
+import com.agnosticcms.web.exception.DataIntegrityException;
 import com.agnosticcms.web.exception.TypeConversionException;
 
 @Service
@@ -62,7 +62,7 @@ public class ModuleTableService {
 			if(lovColumn != null) {
 				lovs.put(i, resultsRetriever.retrieve(tableName, lovColumn, fkNames.get(i)));
 			} else {
-				throw new IllegalArgumentException("No List Of Values column for parent table " + tableName);
+				throw new DataIntegrityException("No List Of Values column for parent table " + tableName);
 			}
 			
 			i++;
@@ -174,7 +174,7 @@ public class ModuleTableService {
 		try {
 			moduleTableDao.deleteRow(module.getTableName(), id);
 		} catch (DataIntegrityViolationException e) {
-			throw new ForeignKeyIntegrityException(e);
+			throw new DataIntegrityException(e, "error.foreignkey.violation");
 		}
 		
 	}
