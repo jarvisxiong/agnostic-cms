@@ -223,6 +223,9 @@ public class SchemaDao {
 				case ENUM:
 					dbColumnType = DbColumnType.STRING;
 					break;
+				case IMAGE:
+					dbColumnType = DbColumnType.STRING;
+					break;
 				default:
 					throw new DaoRuntimeException("Unsupported module column type " + moduleColumnType);
 				}

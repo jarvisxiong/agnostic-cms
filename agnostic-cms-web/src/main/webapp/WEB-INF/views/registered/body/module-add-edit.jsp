@@ -11,7 +11,7 @@
 <tiles:insertDefinition name="registered.main">
     <tiles:putAttribute cascade="true" name="body">
     	<h1><spring:message code="${editMode ? 'module.edit.title' : 'module.add.title'}" /> ${module.title}</h1>
-		<form:form method="POST" action="" commandName="moduleInput">
+		<form:form method="POST" action="" commandName="moduleInput" enctype="${filesEnabled ? 'multipart/form-data' : 'application/x-www-form-urlencoded'}">
 			<c:forEach var="parentModule" items="${parentModules}" varStatus="loop">
 				<c:set var="inputId" value="lov-input-${loop.index}" />
 				<c:set var="path" value="lovValues[${loop.index}]" />
@@ -37,6 +37,7 @@
 				<c:if test="${(editMode and column.showInEdit) or (not editMode and column.showInAdd)}">
 					<c:set var="inputId" value="input-${column.id}" />
 					<c:set var="path" value="columnValues[${column.id}]" />
+					<c:set var="value" value="${columnValues[column.id]}" />
 					<c:set var="errorClass" value="${errorScope.hasFieldErrors(path) ? ' has-error' : ''}" />
 					
 					<c:choose>
@@ -67,6 +68,13 @@
 									<form:options items="${fn:split(column.typeInfo, ',')}" />
 								</form:select>
 							</div>
+						</c:when>
+						<c:when test="${column.type == 'IMAGE'}">
+							<c:if test="${not empty value}">
+								<spring:url var="imgUrl" value="/${value}" htmlEscape="true" />
+								<img src="${imgUrl}" alt="${value}" />
+							</c:if>
+							<input type="file" name="files[${column.id}]" />
 						</c:when>
 						<c:otherwise>undefined</c:otherwise>
 					</c:choose>

@@ -56,4 +56,17 @@ public class ModuleService {
 		return moduleInput;
 	}
 
+	public Object containsFileColumns(List<ModuleColumn> columns) {
+		
+		for(ModuleColumn column : columns) {
+			ColumnType columnType = column.getType();
+			
+			if(columnType == ColumnType.IMAGE) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 }

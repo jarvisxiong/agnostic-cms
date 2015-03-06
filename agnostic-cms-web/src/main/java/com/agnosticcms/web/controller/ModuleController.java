@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.agnosticcms.web.dto.CmsTables;
 import com.agnosticcms.web.dto.Lov;
@@ -113,6 +115,7 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("columns", columns);
 		model.addAttribute("lovs", lovs);
 		model.addAttribute("moduleInput", moduleInput);
+		model.addAttribute("filesEnabled", moduleService.containsFileColumns(columns));
 		return "registered/body/module-add-edit";
 	}
 	
@@ -146,6 +149,7 @@ public class ModuleController extends RegisteredController {
 			model.addAttribute("columns", moduleColumns);
 			model.addAttribute("lovs", lovs);
 			model.addAttribute("moduleInput", moduleInput);
+			model.addAttribute("filesEnabled", moduleService.containsFileColumns(moduleColumns));
 			return "registered/body/module-add-edit";
 		} else {
 			moduleTableService.saveModuleInput(module, moduleInput, parentModules, moduleColumns, null);
