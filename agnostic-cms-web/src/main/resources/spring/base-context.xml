@@ -18,11 +18,15 @@
 		">
 
 	<context:component-scan base-package="com.agnosticcms.web" />
-	
 	<context:annotation-config />
 	
+	<context:property-placeholder location="classpath:properties/web.properties" ignore-unresolvable="true" />
+	
 	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<mvc:resources mapping="/content-resources/**" location="file:${path.uploads}" />
 	<mvc:annotation-driven ignore-default-model-on-redirect="true" />
+	
+	
 
 	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix">
