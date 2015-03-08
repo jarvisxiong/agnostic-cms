@@ -75,15 +75,16 @@ public abstract class ModuleInputValidator implements Validator {
 			if(isColumnProcessable(moduleColumn)) {
 				Long columnId = moduleColumn.getId();
 				ColumnType columnType = moduleColumn.getType();
+				String value = columnValues.get(columnId);
 				
 				
 				if(columnType == ColumnType.IMAGE) {
 					
 					String fieldName = getImagesFieldName(columnId);
 					
-					MultipartFile multipartFile = files.get(columnType);
-					if(moduleColumn.getNotNull()) {
-						if(multipartFile == null || multipartFile.isEmpty()) {
+					MultipartFile multipartFile = files.get(columnId);
+					if(multipartFile == null || multipartFile.isEmpty()) {
+						if(moduleColumn.getNotNull() && StringUtils.isEmpty(value)) {
 							errors.rejectValue(fieldName, CODE_REQUIRED);
 						}
 					} else {
@@ -111,7 +112,6 @@ public abstract class ModuleInputValidator implements Validator {
 					
 				} else {
 					
-					String value = columnValues.get(columnId);
 					String fieldName = getColumnValuesFieldName(columnId);
 					
 					if((StringUtils.isEmpty(value) && columnType != ColumnType.BOOL)) {
@@ -183,7 +183,7 @@ public abstract class ModuleInputValidator implements Validator {
 	}
 	
 	private String getImagesFieldName(Long id) {
-		return getFieldName("images", id);
+		return getFieldName("files", id);
 	}
 	
 	private String getFieldName(String baseName, Number id) {

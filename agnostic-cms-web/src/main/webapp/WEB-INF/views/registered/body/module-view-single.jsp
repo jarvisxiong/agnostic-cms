@@ -17,7 +17,7 @@
 			</c:forEach>
 			<c:forEach var="column" items="${columns}">
 				<dt>${column.name}</dt>
-				<dd><t:stringifier type="${column.type}" value="${row[column.nameInDb]}" /></dd>
+				<dd><t:displayer type="${column.type}" value="${row[column.nameInDb]}" /></dd>
 			</c:forEach>
 		</dl>
 		

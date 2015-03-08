@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.agnosticcms.web.dto.CmsTables;
 import com.agnosticcms.web.dto.Lov;
@@ -24,6 +22,7 @@ import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.dto.form.ModuleInput;
 import com.agnosticcms.web.dto.form.ValidatableModuleInput;
 import com.agnosticcms.web.exception.ResourceNotFoundException;
+import com.agnosticcms.web.service.FileService;
 import com.agnosticcms.web.service.ModuleService;
 import com.agnosticcms.web.service.ModuleTableService;
 import com.agnosticcms.web.service.SessionService;
@@ -48,6 +47,9 @@ public class ModuleController extends RegisteredController {
 	
 	@Autowired
 	private ModuleInputUpdateValidator moduleInputUpdateValidator;
+	
+	@Autowired
+	private FileService fileService;
 	
 	@RequestMapping("/view/{moduleId}")
 	public String view(@PathVariable Long moduleId, Model model) {
@@ -152,6 +154,7 @@ public class ModuleController extends RegisteredController {
 			model.addAttribute("filesEnabled", moduleService.containsFileColumns(moduleColumns));
 			return "registered/body/module-add-edit";
 		} else {
+			fileService.saveImages(module, moduleColumns, moduleInput);
 			moduleTableService.saveModuleInput(module, moduleInput, parentModules, moduleColumns, null);
 			return "redirect:/module/view/" + moduleId;
 		}
@@ -174,6 +177,7 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("lovs", lovs);
 		model.addAttribute("moduleInput", moduleInput);
 		model.addAttribute("editMode", true);
+		model.addAttribute("filesEnabled", moduleService.containsFileColumns(moduleColumns));
 		return "registered/body/module-add-edit";
 	}
 	
@@ -190,6 +194,12 @@ public class ModuleController extends RegisteredController {
 		List<Module> parentModules = moduleService.getParentModules(moduleId);
 		List<ModuleColumn> moduleColumns = moduleService.getModuleColumns(moduleId);
 		List<ModuleHierarchy> moduleHierarchies = moduleService.getModuleHierarchies(moduleId);
+		
+		boolean filesEnabled = moduleService.containsFileColumns(moduleColumns);
+		
+		if(filesEnabled) {
+			moduleTableService.populateWithFileColumnValues(module, itemId, moduleColumns, moduleInput.getColumnValues());
+		}
 		
 		ValidatableModuleInput validatableModuleInput = new ValidatableModuleInput();
 		validatableModuleInput.setModuleInput(moduleInput);
@@ -209,8 +219,10 @@ public class ModuleController extends RegisteredController {
 			model.addAttribute("lovs", lovs);
 			model.addAttribute("moduleInput", moduleInput);
 			model.addAttribute("editMode", true);
+			model.addAttribute("filesEnabled", filesEnabled);
 			return "registered/body/module-add-edit";
 		} else {
+			fileService.saveImages(module, moduleColumns, moduleInput);
 			moduleTableService.saveModuleInput(module, moduleInput, parentModules, moduleColumns, itemId);
 			return "redirect:/module/view/" + moduleId;
 		}

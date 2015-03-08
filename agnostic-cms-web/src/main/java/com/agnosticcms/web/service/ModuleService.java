@@ -56,7 +56,7 @@ public class ModuleService {
 		return moduleInput;
 	}
 
-	public Object containsFileColumns(List<ModuleColumn> columns) {
+	public boolean containsFileColumns(List<ModuleColumn> columns) {
 		
 		for(ModuleColumn column : columns) {
 			ColumnType columnType = column.getType();

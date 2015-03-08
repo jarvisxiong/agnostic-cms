@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.agnosticcms.web.dao.ModuleDao;
 import com.agnosticcms.web.dao.ModuleTableDao;
 import com.agnosticcms.web.dao.SchemaDao;
+import com.agnosticcms.web.dto.ColumnType;
 import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
@@ -205,5 +206,15 @@ public class ModuleTableService {
 	@FunctionalInterface
 	private interface LovResultsRetriever<T> {
 		public T retrieve(String tableName, ModuleColumn moduleColumn, String fkName);
+	}
+
+	public void populateWithFileColumnValues(Module module, Long itemId, List<ModuleColumn> moduleColumns, Map<Long, String> columnValues) {
+		Record row = getRow(module, itemId);
+		
+		for(ModuleColumn moduleColumn : moduleColumns) {
+			if(moduleColumn.getType() == ColumnType.IMAGE) {
+				columnValues.put(moduleColumn.getId(), row.getValue(moduleColumn.getNameInDb(), String.class));
+			}
+		}
 	}
 }

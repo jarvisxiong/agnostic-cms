@@ -26,18 +26,19 @@
 					
 						<c:set var="lov" value="${lovs[loop.index]}" />
 						<c:forEach var="lovItem" items="${lov.items}">
-							<t:stringifier var="optionLabel" type="${lov.type}" value="${lovItem.value}" />
+							<t:displayer var="optionLabel" type="${lov.type}" value="${lovItem.value}" />
 							<form:option value="${lovItem.id}" label="${optionLabel}" />
 						</c:forEach>
 					</form:select>
 				</div>
 			</c:forEach>
+			
 			<c:forEach var="column" items="${columns}">
 			
 				<c:if test="${(editMode and column.showInEdit) or (not editMode and column.showInAdd)}">
 					<c:set var="inputId" value="input-${column.id}" />
 					<c:set var="path" value="columnValues[${column.id}]" />
-					<c:set var="value" value="${columnValues[column.id]}" />
+					<c:set var="value" value="${moduleInput.columnValues[column.id]}" />
 					<c:set var="errorClass" value="${errorScope.hasFieldErrors(path) ? ' has-error' : ''}" />
 					
 					<c:choose>
@@ -70,11 +71,18 @@
 							</div>
 						</c:when>
 						<c:when test="${column.type == 'IMAGE'}">
-							<c:if test="${not empty value}">
-								<spring:url var="imgUrl" value="/${value}" htmlEscape="true" />
-								<img src="${imgUrl}" alt="${value}" />
-							</c:if>
-							<input type="file" name="files[${column.id}]" />
+							<c:set var="path" value="files[${column.id}]" />
+							
+							<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
+							<div class="form-group${errorClass}">
+							    <label for="${inputId}">${column.name}</label>
+								<c:if test="${not empty value}">
+									<div>
+										<t:displayer type="${column.type}" value="${value}" displayWidth="150" />
+									</div>
+								</c:if>
+							    <input type="file" name="${path}" id="${inputId}">
+							 </div>
 						</c:when>
 						<c:otherwise>undefined</c:otherwise>
 					</c:choose>

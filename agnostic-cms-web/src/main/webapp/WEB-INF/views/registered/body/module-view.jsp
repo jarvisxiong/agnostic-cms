@@ -9,48 +9,56 @@
 <tiles:insertDefinition name="registered.main">
     <tiles:putAttribute cascade="true" name="body">
 		<h2>${module.title}</h2>
-		<table class="table table-bordered">
-			<thead>
-				<tr>
-					<c:forEach var="parentModule" items="${parentModules}">
-						<th>${parentModule.name}</th>
-					</c:forEach>
-					<c:forEach var="column" items="${columns}">
-						<c:if test="${column.showInList}">
-							<th>${column.name}</th>
-						</c:if>
-					</c:forEach>
-					<th></th>
-					<th></th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
-				<c:forEach var="row" items="${rows}">
-				
-					<c:set var="rowId" value="${row['id']}" />
-				
-					<spring:url var="viewUrl" value="/module/view/${module.id}/${rowId}" htmlEscape="true" />
-					<spring:url var="editUrl" value="/module/edit/${module.id}/${rowId}" htmlEscape="true" />
-					<spring:url var="deleteUrl" value="/module/delete/${module.id}/${rowId}" htmlEscape="true" />
-				
-					<tr>
-						<c:forEach var="foreignKeyName" items="${foreignKeyNames}" varStatus="loop">
-							<td>${lovs[loop.index][row[foreignKeyName]]}</td>
-						</c:forEach>
-						<c:forEach var="column" items="${columns}">
-							<c:if test="${column.showInList}">
-								<td><t:stringifier type="${column.type}" value="${row[column.nameInDb]}" /></td>
-							</c:if>
-						</c:forEach>
+		<c:choose>
+			<c:when test="${not empty rows}">
+				<table class="table table-bordered">
+					<thead>
+						<tr>
+							<c:forEach var="parentModule" items="${parentModules}">
+								<th>${parentModule.name}</th>
+							</c:forEach>
+							<c:forEach var="column" items="${columns}">
+								<c:if test="${column.showInList}">
+									<th>${column.name}</th>
+								</c:if>
+							</c:forEach>
+							<th></th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<c:forEach var="row" items="${rows}">
 						
-						<td><a href="${viewUrl}"><spring:message code="module.view.view" /></a></td>
-						<td><a href="${editUrl}"><spring:message code="module.view.edit" /></a></td>
-						<td><a href="${deleteUrl}"><spring:message code="module.view.remove" /></a></td>
-					</tr>
-				</c:forEach>
-			</tbody>
-		</table>
+							<c:set var="rowId" value="${row['id']}" />
+						
+							<spring:url var="viewUrl" value="/module/view/${module.id}/${rowId}" htmlEscape="true" />
+							<spring:url var="editUrl" value="/module/edit/${module.id}/${rowId}" htmlEscape="true" />
+							<spring:url var="deleteUrl" value="/module/delete/${module.id}/${rowId}" htmlEscape="true" />
+						
+							<tr>
+								<c:forEach var="foreignKeyName" items="${foreignKeyNames}" varStatus="loop">
+									<td>${lovs[loop.index][row[foreignKeyName]]}</td>
+								</c:forEach>
+								<c:forEach var="column" items="${columns}">
+									<c:if test="${column.showInList}">
+										<td><t:displayer type="${column.type}" value="${row[column.nameInDb]}" displayWidth="50" /></td>
+									</c:if>
+								</c:forEach>
+								
+								<td><a href="${viewUrl}"><spring:message code="module.view.view" /></a></td>
+								<td><a href="${editUrl}"><spring:message code="module.view.edit" /></a></td>
+								<td><a href="${deleteUrl}"><spring:message code="module.view.remove" /></a></td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+			</c:when>
+			<c:otherwise>
+				<h4 class="text-center"><spring:message code="module.view.empty" /></h4>
+			</c:otherwise>
+		</c:choose>
+		
 		
 		<div class="pull-right">
 			<a class="btn btn-default" href="${addUrl}" role="button"><spring:message code="module.add.button" /></a>
