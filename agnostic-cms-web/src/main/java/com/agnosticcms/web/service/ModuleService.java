@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,11 +58,16 @@ public class ModuleService {
 	}
 
 	public boolean containsFileColumns(List<ModuleColumn> columns) {
-		
+		return containsColumns(columns, ColumnType.IMAGE);
+	}
+	
+	public boolean containsHTMLColumns(List<ModuleColumn> columns) {
+		return containsColumns(columns, ColumnType.HTML);
+	}
+	
+	private boolean containsColumns(List<ModuleColumn> columns, ColumnType... columnTypes) {
 		for(ModuleColumn column : columns) {
-			ColumnType columnType = column.getType();
-			
-			if(columnType == ColumnType.IMAGE) {
+			if(ArrayUtils.contains(columnTypes, column.getType())) {
 				return true;
 			}
 		}

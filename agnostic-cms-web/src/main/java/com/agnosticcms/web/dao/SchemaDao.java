@@ -211,6 +211,7 @@ public class SchemaDao {
 				case LONG:
 					dbColumnType = DbColumnType.LONG;
 					break;
+				case HTML:
 				case STRING:
 					dbColumnType = DbColumnType.STRING;
 					
@@ -221,8 +222,6 @@ public class SchemaDao {
 					
 					break;
 				case ENUM:
-					dbColumnType = DbColumnType.STRING;
-					break;
 				case IMAGE:
 					dbColumnType = DbColumnType.STRING;
 					break;

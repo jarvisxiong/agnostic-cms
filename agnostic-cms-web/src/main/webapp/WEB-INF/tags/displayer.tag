@@ -9,12 +9,18 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 
+<c:set var="escapeOutput" value="true" />
+
 <c:choose>
 	<c:when test="${empty value}">
 		<c:set var="displayerResult" value="(None)" />
 	</c:when>
 	<c:when test="${type == 'STRING' or type == 'LONG' or type == 'INT' or type == 'ENUM'}">
 		<c:set var="displayerResult" value="${value}" />
+	</c:when>
+	<c:when test="${type == 'HTML'}">
+		<c:set var="displayerResult" value="${value}" />
+		<c:set var="escapeOutput" value="false" />
 	</c:when>
 	<c:when test="${type == 'BOOL'}">
 		<c:choose>
@@ -38,7 +44,7 @@
 
 <c:choose>
 	<c:when test="${empty var}">
-		<c:out value="${displayerResult}" />
+		<c:out value="${displayerResult}" escapeXml="${escapeOutput}" />
 	</c:when>
 	<c:otherwise>
 		<%-- tmp var is needed just to satisfy eclipse validator.. --%>

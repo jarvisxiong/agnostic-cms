@@ -25,6 +25,7 @@ public class ColumnTypeService {
 		case STRING:
 		case ENUM:
 		case IMAGE:
+		case HTML:
 			return value;
 		default:
 			throw new IllegalArgumentException("Unsupported column type " + columnType);
@@ -68,6 +69,7 @@ public class ColumnTypeService {
 		case STRING:
 		case ENUM:
 		case IMAGE:
+		case HTML:
 			return (String) value;
 		default:
 			throw new IllegalArgumentException("Unsupported column type " + columnType);

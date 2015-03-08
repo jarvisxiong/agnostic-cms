@@ -64,7 +64,9 @@ public class ModuleDao {
 	}
 	
 	public List<Module> getAllModules() {
-		return dslContext.selectFrom(table(CmsTables.MODULES.getTableName())).fetch(new ModuleRecordMapper());
+		return dslContext.selectFrom(table(CmsTables.MODULES.getTableName()))
+				.orderBy(field("order_num"))
+				.fetch(new ModuleRecordMapper());
 	}
 	
 	public Module getModule(Long id) {
@@ -75,7 +77,10 @@ public class ModuleDao {
 	}
 	
 	public List<ModuleColumn> getModuleColumns(Long moduleId) {
-		return dslContext.selectFrom(table(CmsTables.MODULE_COLUMNS.getTableName())).where(field("cms_module_id", Long.class).equal(moduleId)).fetch(new ModuleColumnRecordMapper());
+		return dslContext.selectFrom(table(CmsTables.MODULE_COLUMNS.getTableName()))
+				.where(field("cms_module_id", Long.class).equal(moduleId))
+				.orderBy(field("order_num"))
+				.fetch(new ModuleColumnRecordMapper());
 	}
 	
 	public Map<Long, ModuleColumn> getColumnsByIds(List<Long> columnIds) {

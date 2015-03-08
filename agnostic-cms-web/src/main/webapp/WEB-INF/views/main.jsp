@@ -7,6 +7,13 @@
 <spring:url value="/resources/js/bootstrap.js" var="bootstrapJsUrl" htmlEscape="true"/>
 <spring:url value="/resources/js/jquery-2.1.3.min.js" var="jqueryJsUrl" htmlEscape="true"/>
 
+<spring:url value="/resources/plugins/font-awesome/css/font-awesome.css" var="fontAwesomeCssUrl" htmlEscape="true"/>
+
+<spring:url value="/resources/plugins/summernote/summernote.min.js" var="summernoteJsUrl" htmlEscape="true"/>
+<spring:url value="/resources/plugins/summernote/summernote.css" var="summernoteCssUrl" htmlEscape="true"/>
+
+<spring:url value="/resources/js/cms.js" var="cmsJsUrl" htmlEscape="true"/>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,6 +22,15 @@
 <link rel="stylesheet" href="${bootstrapCssUrl}">
 <script src="${jqueryJsUrl}"></script>
 <script src="${bootstrapJsUrl}"></script>
+
+<c:if test="${wysiwygEnabled}">
+	<link rel="stylesheet" href="${fontAwesomeCssUrl}">
+	<link rel="stylesheet" href="${summernoteCssUrl}">
+	<script src="${summernoteJsUrl}"></script>
+</c:if>
+
+<script src="${cmsJsUrl}"></script>
+
 </head>
 
 <body>

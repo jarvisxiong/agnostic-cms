@@ -114,7 +114,9 @@ public abstract class ModuleInputValidator implements Validator {
 					
 					String fieldName = getColumnValuesFieldName(columnId);
 					
-					if((StringUtils.isEmpty(value) && columnType != ColumnType.BOOL)) {
+					String blankTestValue = columnType == ColumnType.HTML ? value.replaceAll("(<br\\s*/?>)", "") : value;
+					
+					if((StringUtils.isBlank(blankTestValue) && columnType != ColumnType.BOOL)) {
 						if(moduleColumn.getNotNull()) {
 							errors.rejectValue(fieldName, CODE_REQUIRED);
 						}
@@ -144,6 +146,7 @@ public abstract class ModuleInputValidator implements Validator {
 						
 						switch (columnType) {
 						case STRING:
+						case HTML:
 							
 							Integer size = moduleColumn.getSize();
 							

@@ -118,6 +118,7 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("lovs", lovs);
 		model.addAttribute("moduleInput", moduleInput);
 		model.addAttribute("filesEnabled", moduleService.containsFileColumns(columns));
+		model.addAttribute("wysiwygEnabled", moduleService.containsHTMLColumns(columns));
 		return "registered/body/module-add-edit";
 	}
 	
@@ -152,6 +153,7 @@ public class ModuleController extends RegisteredController {
 			model.addAttribute("lovs", lovs);
 			model.addAttribute("moduleInput", moduleInput);
 			model.addAttribute("filesEnabled", moduleService.containsFileColumns(moduleColumns));
+			model.addAttribute("wysiwygEnabled", moduleService.containsHTMLColumns(moduleColumns));
 			return "registered/body/module-add-edit";
 		} else {
 			fileService.saveImages(module, moduleColumns, moduleInput);
@@ -178,6 +180,7 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("moduleInput", moduleInput);
 		model.addAttribute("editMode", true);
 		model.addAttribute("filesEnabled", moduleService.containsFileColumns(moduleColumns));
+		model.addAttribute("wysiwygEnabled", moduleService.containsHTMLColumns(moduleColumns));
 		return "registered/body/module-add-edit";
 	}
 	
@@ -220,6 +223,7 @@ public class ModuleController extends RegisteredController {
 			model.addAttribute("moduleInput", moduleInput);
 			model.addAttribute("editMode", true);
 			model.addAttribute("filesEnabled", filesEnabled);
+			model.addAttribute("wysiwygEnabled", moduleService.containsHTMLColumns(moduleColumns));
 			return "registered/body/module-add-edit";
 		} else {
 			fileService.saveImages(module, moduleColumns, moduleInput);

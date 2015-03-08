@@ -37,9 +37,19 @@
 			
 				<c:if test="${(editMode and column.showInEdit) or (not editMode and column.showInAdd)}">
 					<c:set var="inputId" value="input-${column.id}" />
-					<c:set var="path" value="columnValues[${column.id}]" />
 					<c:set var="value" value="${moduleInput.columnValues[column.id]}" />
+					
+					<c:choose>
+						<c:when test="${column.type == 'IMAGE'}">
+							<c:set var="path" value="files[${column.id}]" />
+						</c:when>
+						<c:otherwise>
+							<c:set var="path" value="columnValues[${column.id}]" />
+						</c:otherwise>
+					</c:choose>
+					
 					<c:set var="errorClass" value="${errorScope.hasFieldErrors(path) ? ' has-error' : ''}" />
+					
 					
 					<c:choose>
 						<c:when test="${column.type == 'STRING' or column.type == 'LONG' or column.type == 'INT'}">
@@ -71,11 +81,10 @@
 							</div>
 						</c:when>
 						<c:when test="${column.type == 'IMAGE'}">
-							<c:set var="path" value="files[${column.id}]" />
 							
 							<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
 							<div class="form-group${errorClass}">
-							    <label for="${inputId}">${column.name}</label>
+							    <label class="control-label" for="${inputId}">${column.name}</label>
 								<c:if test="${not empty value}">
 									<div>
 										<t:displayer type="${column.type}" value="${value}" displayWidth="150" />
@@ -83,6 +92,13 @@
 								</c:if>
 							    <input type="file" name="${path}" id="${inputId}">
 							 </div>
+						</c:when>
+						<c:when test="${column.type == 'HTML'}">
+							<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
+							<div class="form-group${errorClass}">
+								<label class="control-label" for="${inputId}">${column.name}</label>
+								<form:textarea id="${inputId}" path="${path}" cssClass="summernote" />
+							</div>
 						</c:when>
 						<c:otherwise>undefined</c:otherwise>
 					</c:choose>
