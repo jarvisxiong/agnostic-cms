@@ -1,17 +1,32 @@
-<nav class="navbar navbar-default">
-  <div class="container">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">Agnostic CMS</a>
-    </div>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Home</a></li>
-        <li><a href="#">Link 1</a></li>
-        <li><a href="#">Link 2</a></li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
+<spring:url var="logoutUrl" value="/logout" htmlEscape="true" />
+<spring:url var="homeUrl" value="/home" htmlEscape="true" />
+
+
+<nav id="navbar-example" class="navbar navbar-default navbar-static">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="${homeUrl}">Agnostic CMS</a>
+		</div>
+		<div class="collapse navbar-collapse">
+			<ul class="nav navbar-nav navbar-right">
+				<li id="fat-menu" class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+						<span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+						${username}
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
+						<li role="presentation">
+							<a role="menuitem" tabindex="-1" href="${logoutUrl}">
+								<span class="glyphicon glyphicon-log-out"></span>
+								Logout
+							</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</div>
 </nav>

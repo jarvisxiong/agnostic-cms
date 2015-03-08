@@ -2,9 +2,9 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 
-<spring:url value="/resources/css/bootstrap.css" var="bootstrapCssUrl" htmlEscape="true"/>
+<spring:url value="/resources/plugins/bootstrap/css/bootstrap.css" var="bootstrapCssUrl" htmlEscape="true"/>
+<spring:url value="/resources/plugins/bootstrap/js/bootstrap.js" var="bootstrapJsUrl" htmlEscape="true"/>
 
-<spring:url value="/resources/js/bootstrap.js" var="bootstrapJsUrl" htmlEscape="true"/>
 <spring:url value="/resources/js/jquery-2.1.3.min.js" var="jqueryJsUrl" htmlEscape="true"/>
 
 <spring:url value="/resources/plugins/font-awesome/css/font-awesome.css" var="fontAwesomeCssUrl" htmlEscape="true"/>

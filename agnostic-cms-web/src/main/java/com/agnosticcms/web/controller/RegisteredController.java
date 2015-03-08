@@ -5,23 +5,34 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.exception.DataIntegrityException;
 import com.agnosticcms.web.service.ModuleService;
+import com.agnosticcms.web.service.SessionService;
 
 public abstract class RegisteredController {
 
 	private static final String ATTR_MODULES = "modules";
+	private static final String ATTR_USERNAME = "username";
 	
 	@Autowired
 	protected ModuleService moduleService;
+	
+	@Autowired
+	protected SessionService sessionService;
 	
 	
 	@ModelAttribute(ATTR_MODULES)
 	public List<Module> getAllModules() {
 		return moduleService.getAllModules();
+	}
+	
+	@ModelAttribute(ATTR_USERNAME)
+	public String getUsername() {
+		return sessionService.getAttribute("cms-user");
 	}
 	
 	/**
@@ -30,6 +41,13 @@ public abstract class RegisteredController {
 	 */
 	protected void populateModuleAndView(ModelAndView modelAndView) {
 		modelAndView.addObject(ATTR_MODULES, getAllModules());
+		modelAndView.addObject(ATTR_USERNAME, getAllModules());
+	}
+	
+	@RequestMapping("/logout")
+	public String logout() {
+		sessionService.removeAttribute("cms-user");
+		return "redirect:/";
 	}
 	
 	@ExceptionHandler(DataIntegrityException.class)
