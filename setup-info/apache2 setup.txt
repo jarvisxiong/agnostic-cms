@@ -9,10 +9,23 @@ sudo a2enmod proxy
 sudo a2enmod proxy_http
 sudo a2enmod session_dbd
 sudo a2enmod headers
+sudo a2enmod ssl
 
 php -r "echo '{SHA}' . base64_encode(sha1('admin', true)) . \"\n\";"
 
 sudo apt-get install libaprutil1-dbd-pgsql
+
+openssl genrsa -des3 -passout pass:x -out cmstest.pass.key 2048
+openssl rsa -passin pass:x -in cmstest.pass.key -out cmstest.key
+rm cmstest.pass.key
+openssl req -new -key cmstest.key -out cmstestrequest.csr
+openssl x509 -req -days 365 -in cmstestrequest.csr -signkey cmstest.key -out cmstest.crt
+rm cmstestrequest.csr
+
+sudo mkdir /etc/apache2/keys
+sudo mv ./cmstest.crt /etc/apache2/keys
+sudo mv ./cmstest.key /etc/apache2/keys
+
 
 
 
@@ -20,44 +33,59 @@ sudo apt-get install libaprutil1-dbd-pgsql
 ServerName localhost
 
 
-DBDriver pgsql
-DBDParams "host=localhost dbname=agnosticcms port=5433 user=postgres password=postgres"
-DBDMin  4
-DBDKeep 8
-DBDMax  20
-DBDExptime 300
-DBDPrepareSQL "delete from cms_sessions where key = %s" deletesession
-DBDPrepareSQL "update cms_sessions set value = %s, expiry = %lld, key = %s where key = %s" updatesession
-DBDPrepareSQL "insert into cms_sessions (value, expiry, key) values (%s, %lld, %s)" insertsession
-DBDPrepareSQL "select value from cms_sessions where key = %s and (expiry = 0 or expiry > %lld)" selectsession
-DBDPrepareSQL "delete from cms_sessions where expiry != 0 and expiry < %lld" cleansession
+<VirtualHost *:443>
+
+	DocumentRoot /var/www/
+
+	DBDriver pgsql
+	DBDParams "host=localhost dbname=agnosticcms port=5433 user=postgres password=postgres"
+	DBDMin  4
+	DBDKeep 8
+	DBDMax  20
+	DBDExptime 300
+	DBDPrepareSQL "delete from cms_sessions where key = %s" deletesession
+	DBDPrepareSQL "update cms_sessions set value = %s, expiry = %lld, key = %s where key = %s" updatesession
+	DBDPrepareSQL "insert into cms_sessions (value, expiry, key) values (%s, %lld, %s)" insertsession
+	DBDPrepareSQL "select value from cms_sessions where key = %s and (expiry = 0 or expiry > %lld)" selectsession
+	DBDPrepareSQL "delete from cms_sessions where expiry != 0 and expiry < %lld" cleansession
+
+	SSLEngine on
+	SSLCertificateFile keys/cmstest.crt
+	SSLCertificateKeyFile keys/cmstest.key
+
+	<Location /cms>
+	  AuthFormProvider dbd
+	  AuthType form
+	  AuthName cms
+	 
+	  Session On
+	  SessionEnv On
+	  SessionDBDCookieName session path=/
+	  SessionCryptoPassphrase asjindsdci1232TFA74jas71QWsa
+	  SessionHeader X-Replace-Session
+	  RequestHeader set X-Session "%{HTTP_SESSION}e"
+	  
+	  ErrorDocument 401 /login.html
+	  AuthFormLoginSuccessLocation /cms/home
+	 
+	  # mod_authz_core configuration
+	  Require valid-user
+	 
+	  # mod_authn_dbd SQL query to authenticate a user
+	  AuthDBDUserPWQuery "SELECT password as password FROM cms_users WHERE username = %s"
+
+	</Location>
+
+
+	ProxyPass /cms http://localhost:8080/cms
+	ProxyPassReverse  /cms http://localhost:8080/cms
+	ProxyPassReverseCookieDomain  localhost:8080 localhost
+	ProxyPassReverseCookiePath  /cms  /cms
+</VirtualHost>
 
 
 
-<Location /cms>
-  AuthFormProvider dbd
-  AuthType form
-  AuthName cms
- 
-  Session On
-  SessionEnv On
-  SessionDBDCookieName session path=/
-  SessionCryptoPassphrase asjindsdci1232TFA74jas71QWsa
-  SessionHeader X-Replace-Session
-  RequestHeader set X-Session "%{HTTP_SESSION}e"
-  
-  ErrorDocument 401 /login.html
- 
-  # mod_authz_core configuration
-  Require valid-user
- 
-  # mod_authn_dbd SQL query to authenticate a user
-  AuthDBDUserPWQuery "SELECT password as password FROM cms_users WHERE username = %s"
-</Location>
 
 
-ProxyPass /cms http://localhost:8080/cms
-ProxyPassReverse  /cms http://localhost:8080/cms
-ProxyPassReverseCookieDomain  localhost:8080 localhost
-ProxyPassReverseCookiePath  /cms  /cms
+
 
