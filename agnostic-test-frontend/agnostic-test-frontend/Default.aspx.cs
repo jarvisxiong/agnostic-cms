@@ -10,13 +10,8 @@ namespace agnostictestfrontend
 
 	public partial class Default : System.Web.UI.Page
 	{
-		
-		public void button1Clicked (object sender, EventArgs args)
-		{
-			button1.Text = "You clicked me";
-		}
 
-		public String GetDBData () {
+		public List<Category> GetDBData () {
 			string connectionString =
 				"Server=localhost;" +
 					"Database=agnosticcms;" +
@@ -33,30 +28,36 @@ namespace agnostictestfrontend
 			//        CREATE TABLE employee (
 			//           firstname varchar(32),
 			//           lastname varchar(32));
-			string sql = "SELECT m.id, m.name, mc.id, mc.name, mc.name, mc.id" +
-										"FROM cms_modules m JOIN cms_module_columns mc" +
+			string sql = "SELECT m.id, m.name, m.title, mc.id, mc.name, mc.name, mc.name, mc.id " +
+										"FROM cms_modules m JOIN cms_module_columns mc " +
 										"ON mc.cms_module_id = m.id";
 			dbcmd.CommandText = sql;
 			NpgsqlDataReader reader = (Npgsql.NpgsqlDataReader) dbcmd.ExecuteReader();
 
+			List<Category> categories = new List<Category>();
 			Category curCategory = null;
 			while(reader.Read()) {
 				long categoryId = reader.GetInt64(0);
 				string categoryName = reader.GetString(1);
-				long productId = reader.GetInt64(2);
-				string productName = reader.GetString(3);
-				string productImage = reader.GetString(4);
-				decimal productPrice = reader.GetDecimal(5);
+				string categoryDescription = reader.GetString(2);
+				long productId = reader.GetInt64(3);
+				string productName = reader.GetString(4);
+				string productDescription = reader.GetString(5);
+				string productImage = reader.GetString(6);
+				decimal productPrice = (decimal) reader.GetInt64(7);
 
 				if(curCategory == null || curCategory.id != categoryId) {
 					curCategory = new Category ();
+					categories.Add (curCategory);
 					curCategory.id = categoryId;
 					curCategory.name = categoryName;
+					curCategory.description = categoryDescription;
 				}
 
 				Product product = new Product ();
 				product.id = productId;
 				product.name = productName;
+				product.description = productDescription;
 				product.image = productImage;
 				product.price = productPrice;
 				curCategory.addProcuct (product);
@@ -69,13 +70,14 @@ namespace agnostictestfrontend
 			dbcon.Close();
 			dbcon = null;
 
-			return "aaa";
+			return categories;
 		}
 	}
 
 	public class Category {
 		public long id { get; set;}
 		public string name { get; set;}
+		public string description { get; set;}
 		public List<Product> products { get; set;}
 
 		public Category() {
@@ -89,6 +91,7 @@ namespace agnostictestfrontend
 
 	public class Product {
 		public long id { get; set;}
+		public string description { get; set;}
 		public string name { get; set;}
 		public string image { get; set;}
 		public decimal price { get; set;}
