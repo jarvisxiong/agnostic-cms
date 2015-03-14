@@ -22,7 +22,6 @@ import com.agnosticcms.web.dto.ColumnType;
 import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
-import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.dto.form.ModuleInput;
 import com.agnosticcms.web.exception.DataIntegrityException;
 import com.agnosticcms.web.exception.TypeConversionException;
@@ -188,9 +187,8 @@ public class ModuleTableService {
 		Long moduleId = module.getId();
 		List<ModuleColumn> moduleColumns = moduleDao.getModuleColumns(moduleId);
 		List<Module> parentModules = moduleDao.getParentModules(moduleId);
-		List<ModuleHierarchy> moduleHierarchies = moduleDao.getModuleHierarchies(moduleId);
 		
-		schemaDao.createOrUpdateModuleSchema(module, parentModules, moduleColumns, moduleHierarchies);
+		schemaDao.createOrUpdateModuleSchema(module, parentModules, moduleColumns);
 		
 		moduleDao.setActivated(moduleId, true);
 	}

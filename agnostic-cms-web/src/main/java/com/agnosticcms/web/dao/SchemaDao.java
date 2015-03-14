@@ -15,11 +15,10 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Repository;
 
 import com.agnosticcms.web.dbutil.PdbEngineProvider;
-import com.agnosticcms.web.dto.CmsTables;
+import com.agnosticcms.web.dto.CmsTable;
 import com.agnosticcms.web.dto.ColumnType;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
-import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.exception.DaoRuntimeException;
 import com.agnosticcms.web.exception.TypeConversionException;
 import com.agnosticcms.web.service.ColumnTypeService;
@@ -50,8 +49,14 @@ public class SchemaDao {
 	
 	
 	public boolean cmsTablesExist() {
-		return tableExists(CmsTables.USERS.getTableName()) && tableExists(CmsTables.SESSIONS.getTableName()) && tableExists(CmsTables.MODULES.getTableName())
-				&& tableExists(CmsTables.MODULE_COLUMNS.getTableName()) && tableExists(CmsTables.MODULE_HIERARCHY.getTableName());
+		
+		for(CmsTable cmsTable : CmsTable.values()) {
+			if(!tableExists(cmsTable.getTableName())) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	public void createCmsUsersTable() {
@@ -74,7 +79,7 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity cmsSessionsTable = SqlBuilder.dbEntity()
-			        .name(CmsTables.SESSIONS.getTableName())
+			        .name(CmsTable.SESSIONS.getTableName())
 			        .addColumn(SqlBuilder.dbColumn().name("key").type(DbColumnType.STRING).size(36).addConstraints(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("value").type(DbColumnType.STRING).size(5000).addConstraints(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("expiry").type(DbColumnType.LONG).addConstraints(DbColumnConstraint.NOT_NULL).build())
@@ -94,7 +99,7 @@ public class SchemaDao {
 	
 	private DbEntity getCmsModulesTableDefinition() {
 		return SqlBuilder.dbEntity()
-	        .name(CmsTables.MODULES.getTableName())
+	        .name(CmsTable.MODULES.getTableName())
 	        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
 	        .addColumn(SqlBuilder.dbColumn().name("name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(30).build())
 	        .addColumn(SqlBuilder.dbColumn().name("title").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(140).build())
@@ -116,7 +121,7 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity fkUpdate = getCmsModulesTableDefinition().newBuilder().addFk(
-				SqlBuilder.dbFk().addColumn("cms_module_column_id").foreignTable(CmsTables.MODULE_COLUMNS.getTableName()).addForeignColumn("id")
+				SqlBuilder.dbFk().addColumn("cms_module_column_id").foreignTable(CmsTable.MODULE_COLUMNS.getTableName()).addForeignColumn("id")
 			).build();
 			
 			engine.updateEntity(fkUpdate);
@@ -128,7 +133,7 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity cmsModulesTable = SqlBuilder.dbEntity()
-			        .name(CmsTables.MODULE_COLUMNS.getTableName())
+			        .name(CmsTable.MODULE_COLUMNS.getTableName())
 			        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("cms_module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(50).build())
@@ -144,7 +149,7 @@ public class SchemaDao {
 			        .addColumn(SqlBuilder.dbColumn().name("show_in_add").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .pkFields("id")
-			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(CmsTables.MODULES.getTableName()).addForeignColumn("id"))
+			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(CmsTable.MODULES.getTableName()).addForeignColumn("id"))
 			        .build();
 			
 			engine.addEntity(cmsModulesTable);
@@ -157,14 +162,14 @@ public class SchemaDao {
 		execute((engine) -> {
 			
 			DbEntity cmsModuleHierarchyTable = SqlBuilder.dbEntity()
-			        .name(CmsTables.MODULE_HIERARCHY.getTableName())
+			        .name(CmsTable.MODULE_HIERARCHY.getTableName())
 			        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("cms_module_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("cms_module2_id").type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .addColumn(SqlBuilder.dbColumn().name("mandatory").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
 			        .pkFields("id")
-			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(CmsTables.MODULES.getTableName()).addForeignColumn("id"))
-			        .addFk(SqlBuilder.dbFk().addColumn("cms_module2_id").foreignTable(CmsTables.MODULES.getTableName()).addForeignColumn("id"))
+			        .addFk(SqlBuilder.dbFk().addColumn("cms_module_id").foreignTable(CmsTable.MODULES.getTableName()).addForeignColumn("id"))
+			        .addFk(SqlBuilder.dbFk().addColumn("cms_module2_id").foreignTable(CmsTable.MODULES.getTableName()).addForeignColumn("id"))
 			        .build();
 			
 			engine.addEntity(cmsModuleHierarchyTable);
@@ -172,7 +177,26 @@ public class SchemaDao {
 		}, "Unable to create cms module columns table");
 	}
 	
-	public void createOrUpdateModuleSchema(Module module, List<Module> parentModules, List<ModuleColumn> moduleColumns, List<ModuleHierarchy> moduleHierarchies) {
+	public void createCmsExtenalModulesTable() {
+		
+		execute((engine) -> {
+			
+			DbEntity cmsExtenalModulesTable = SqlBuilder.dbEntity()
+				        .name(CmsTable.EXTERNAL_MODULES.getTableName())
+				        .addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build())
+				        .addColumn(SqlBuilder.dbColumn().name("name").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(30).build())
+				        .addColumn(SqlBuilder.dbColumn().name("url").type(DbColumnType.STRING).addConstraint(DbColumnConstraint.NOT_NULL).size(400).build())
+				        .addColumn(SqlBuilder.dbColumn().name("activated").type(DbColumnType.BOOLEAN).addConstraint(DbColumnConstraint.NOT_NULL).build())
+				        .addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).build())
+				        .pkFields("id")
+				        .build();
+			
+			engine.addEntity(cmsExtenalModulesTable);
+			
+		}, "Unable to create cms external modules table");
+	}
+	
+	public void createOrUpdateModuleSchema(Module module, List<Module> parentModules, List<ModuleColumn> moduleColumns) {
 		
 		execute((engine) -> {
 		

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.agnosticcms.web.dao.ModuleDao;
 import com.agnosticcms.web.dto.ColumnType;
+import com.agnosticcms.web.dto.ExternalModule;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
 import com.agnosticcms.web.dto.ModuleHierarchy;
@@ -25,6 +26,10 @@ public class ModuleService {
 	
 	public List<Module> getAllModules() {
 		return moduleDao.getAllModules();
+	}
+	
+	public List<ExternalModule> getAllExternalModules() {
+		return moduleDao.getAllExternalModules();
 	}
 	
 	public Module getModule(Long id) {

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.agnosticcms.web.dao.ModuleDao;
 import com.agnosticcms.web.dao.SchemaDao;
 import com.agnosticcms.web.dao.UserDao;
+import com.agnosticcms.web.dto.CmsTable;
 import com.agnosticcms.web.dto.ColumnType;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
@@ -43,13 +44,15 @@ public class InitDbService {
 		schemaDao.createCmsModulesTable();
 		schemaDao.createCmsModuleColumnsTable();
 		schemaDao.createCmsModuleHierarchyTable();
+		schemaDao.createCmsExtenalModulesTable();
 		
 		userDao.createUser("admin", crypService.getSha1Base64ForApache("admin"));
 		
 		List<Module> modules = new ArrayList<>();
-		modules.add(new Module("Modules", "Modules", "cms_modules", true, true, 1l, 1l));
-		modules.add(new Module("Module Columns", "Module Columns", "cms_module_columns", true, true, 7l, 2l));
-		modules.add(new Module("Module Hierarchy", "Module Hierarchy", "cms_module_hierarchy", false, true, null, 3l));
+		modules.add(new Module("Modules", "Modules", CmsTable.MODULES.getTableName(), true, true, 1l, 1l));
+		modules.add(new Module("Module Columns", "Module Columns", CmsTable.MODULE_COLUMNS.getTableName(), true, true, 7l, 2l));
+		modules.add(new Module("Module Hierarchy", "Module Hierarchy", CmsTable.MODULE_HIERARCHY.getTableName(), false, true, null, 3l));
+		modules.add(new Module("External Modules", "External Modules", CmsTable.EXTERNAL_MODULES.getTableName(), true, true, 18l, 4l));
 		moduleDao.insertModules(modules);
 		
 		String columnTypesConcat = moduleService.getAllColumnTypesAsString();
@@ -72,6 +75,9 @@ public class InitDbService {
 		moduleColumns.add(new ModuleColumn(2l, "Show in Edit", "show_in_edit", ColumnType.BOOL, null, null, true, null, false, true, true, true, 9));
 		moduleColumns.add(new ModuleColumn(2l, "Show in Add", "show_in_add", ColumnType.BOOL, null, null, true, "true", false, true, true, true, 10));
 		moduleColumns.add(new ModuleColumn(3l, "Mandatory", "mandatory", ColumnType.BOOL, null, null, true, "false", false, true, true, true, 11));
+		moduleColumns.add(new ModuleColumn(4l, "Name", "name", ColumnType.STRING, 30, null, true, null, false, true, true, true, 1));
+		moduleColumns.add(new ModuleColumn(4l, "URL", "url", ColumnType.STRING, 300, null, true, null, false, true, true, true, 2));
+		moduleColumns.add(new ModuleColumn(4l, "Activated", "activated", ColumnType.BOOL, null, null, true, "true", false, true, true, true, 3));
 		moduleDao.insertModuleColumns(moduleColumns);
 		
 		List<ModuleHierarchy> moduleHierarchies = new ArrayList<>();

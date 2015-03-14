@@ -1,18 +1,19 @@
 package com.agnosticcms.web.dto;
 
-public enum CmsTables {
+public enum CmsTable {
 
 	USERS(null, "cms_users"),
 	SESSIONS(null, "cms_sessions"),
 	MODULES(1l, "cms_modules"),
 	MODULE_COLUMNS(2l, "cms_module_columns"),
-	MODULE_HIERARCHY(3l, "cms_module_hierarchy");
+	MODULE_HIERARCHY(3l, "cms_module_hierarchy"),
+	EXTERNAL_MODULES(4l, "cms_external_modules");
 	
 	private Long moduleId;
 	private String tableName;
 	
 
-	private CmsTables(Long moduleId, String tableName) {
+	private CmsTable(Long moduleId, String tableName) {
 		this.moduleId = moduleId;
 		this.tableName = tableName;
 	}

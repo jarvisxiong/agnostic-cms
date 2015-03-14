@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.agnosticcms.web.dto.CmsTables;
+import com.agnosticcms.web.dto.CmsTable;
 import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
@@ -87,7 +87,7 @@ public class ModuleController extends RegisteredController {
 		model.addAttribute("parentModules", parentModules);
 		model.addAttribute("columns", moduleColumns);
 		model.addAttribute("lovItems", lovItems);
-		model.addAttribute("activable", moduleId == CmsTables.MODULES.getModuleId());
+		model.addAttribute("activable", moduleId == CmsTable.MODULES.getModuleId());
 		return "registered/body/module-view-single";
 	}
 	
@@ -243,7 +243,7 @@ public class ModuleController extends RegisteredController {
 			moduleTableService.deactivate(module);
 		}
 
-		return "redirect:/module/view/" + CmsTables.MODULES.getModuleId();
+		return "redirect:/module/view/" + CmsTable.MODULES.getModuleId();
 	}
 	
 	private Module selectModule(Long id, Model model) {

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.agnosticcms.web.dto.ExternalModule;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.exception.DataIntegrityException;
 import com.agnosticcms.web.service.ModuleService;
@@ -16,6 +17,7 @@ import com.agnosticcms.web.service.SessionService;
 public abstract class RegisteredController {
 
 	private static final String ATTR_MODULES = "modules";
+	private static final String ATTR_EXTERNAL_MODULES = "externalModules";
 	private static final String ATTR_USERNAME = "username";
 	
 	@Autowired
@@ -30,6 +32,11 @@ public abstract class RegisteredController {
 		return moduleService.getAllModules();
 	}
 	
+	@ModelAttribute(ATTR_EXTERNAL_MODULES)
+	public List<ExternalModule> getAllExternalModules() {
+		return moduleService.getAllExternalModules();
+	}
+	
 	@ModelAttribute(ATTR_USERNAME)
 	public String getUsername() {
 		return sessionService.getAttribute("cms-user");
@@ -41,6 +48,7 @@ public abstract class RegisteredController {
 	 */
 	protected void populateModuleAndView(ModelAndView modelAndView) {
 		modelAndView.addObject(ATTR_MODULES, getAllModules());
+		modelAndView.addObject(ATTR_EXTERNAL_MODULES, getAllExternalModules());
 		modelAndView.addObject(ATTR_USERNAME, getAllModules());
 	}
 	
