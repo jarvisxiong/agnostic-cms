@@ -15,7 +15,7 @@
 	<c:when test="${empty value}">
 		<c:set var="displayerResult" value="(None)" />
 	</c:when>
-	<c:when test="${type == 'STRING' or type == 'LONG' or type == 'INT' or type == 'ENUM'}">
+	<c:when test="${type == 'STRING' or type == 'LONG' or type == 'INT' or type == 'ENUM' or type == 'DECIMAL'}">
 		<c:set var="displayerResult" value="${value}" />
 	</c:when>
 	<c:when test="${type == 'HTML'}">

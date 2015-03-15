@@ -10,6 +10,7 @@ sudo a2enmod proxy_http
 sudo a2enmod session_dbd
 sudo a2enmod headers
 sudo a2enmod ssl
+sudo a2enmod rewrite
 
 php -r "echo '{SHA}' . base64_encode(sha1('admin', true)) . \"\n\";"
 
@@ -76,16 +77,29 @@ ServerName localhost
 
 	</Location>
 
+	ProxyPass /cms/php http://localhost:8081
+	ProxyPassReverse  /cms/php http://localhost:8081
+	ProxyPassReverseCookieDomain  localhost:8081 localhost
+	ProxyPassReverseCookiePath  /  /cms
 
 	ProxyPass /cms http://localhost:8080/cms
 	ProxyPassReverse  /cms http://localhost:8080/cms
 	ProxyPassReverseCookieDomain  localhost:8080 localhost
-	ProxyPassReverseCookiePath  /cms  /cms
+	
 </VirtualHost>
 
 
 
 
 
+<Directory "/home/tom/Desktop/Agnostic CMS/agnostic-cms/agnostic-test-backend-php">
+	Options Indexes FollowSymLinks
+	AllowOverride All
+	Require all granted
+</Directory>
 
 
+Listen 8081
+<VirtualHost *:8081>
+	DocumentRoot "/home/tom/Desktop/Agnostic CMS/agnostic-cms/agnostic-test-backend-php"
+</VirtualHost>

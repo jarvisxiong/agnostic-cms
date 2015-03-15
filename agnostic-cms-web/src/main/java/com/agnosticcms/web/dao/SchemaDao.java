@@ -235,6 +235,9 @@ public class SchemaDao {
 				case LONG:
 					dbColumnType = DbColumnType.LONG;
 					break;
+				case DECIMAL:
+					dbColumnType = DbColumnType.DOUBLE;
+					break;
 				case HTML:
 				case STRING:
 					dbColumnType = DbColumnType.STRING;

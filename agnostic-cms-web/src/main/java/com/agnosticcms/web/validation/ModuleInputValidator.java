@@ -133,6 +133,7 @@ public abstract class ModuleInputValidator implements Validator {
 							switch (columnType) {
 							case INT:
 							case LONG:
+							case DECIMAL:
 								errorCode = CODE_INVALID_NUMBER;
 								break;
 							default:

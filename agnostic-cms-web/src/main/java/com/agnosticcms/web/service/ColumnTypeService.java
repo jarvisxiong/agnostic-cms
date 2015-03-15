@@ -22,6 +22,8 @@ public class ColumnTypeService {
 			return parseInt(value);
 		case LONG:
 			return parseLong(value);
+		case DECIMAL:
+			return parseDecimal(value);
 		case STRING:
 		case ENUM:
 		case IMAGE:
@@ -32,7 +34,7 @@ public class ColumnTypeService {
 		}
 		
 	}
-	
+
 	private Boolean parseBoolean(String value) {
 		return "true".equals(value);
 	}
@@ -43,7 +45,16 @@ public class ColumnTypeService {
 		} catch(NumberFormatException e) {
 			throw new TypeConversionException("Failed to convert string to Integer", e);
 		}
+	}
+	
+	private Double parseDecimal(String value) throws TypeConversionException {
+		value = value.replace(",", ".");
 		
+		try {
+			return Double.valueOf(value);
+		} catch(NumberFormatException e) {
+			throw new TypeConversionException("Failed to convert string to Double", e);
+		}
 	}
 	
 	private Long parseLong(String value) throws TypeConversionException {
@@ -65,6 +76,7 @@ public class ColumnTypeService {
 			return ((Boolean) value) ? "true" : "false";
 		case INT:
 		case LONG:
+		case DECIMAL:
 			return value.toString();
 		case STRING:
 		case ENUM:

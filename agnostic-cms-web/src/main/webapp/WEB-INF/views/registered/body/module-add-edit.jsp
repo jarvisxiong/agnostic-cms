@@ -52,7 +52,7 @@
 					
 					
 					<c:choose>
-						<c:when test="${column.type == 'STRING' or column.type == 'LONG' or column.type == 'INT'}">
+						<c:when test="${column.type == 'STRING' or column.type == 'LONG' or column.type == 'INT' or column.type == 'DECIMAL'}">
 							<div class="form-group${errorClass}">
 								<label class="control-label" for="${inputId}">${column.name}</label>
 								<form:errors path="${path}" cssClass="text-danger pull-right" element="div" />
