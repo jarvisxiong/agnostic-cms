@@ -23,7 +23,7 @@ public class FileService {
 	
 	public static final String IMG_DIR = "images";
 
-	@Value("${path.uploads}")
+	@Value("${uploads.path}")
 	private String uploadsPath;
 	
 	public void saveImages(Module module, List<ModuleColumn> moduleColumns, ModuleInput moduleInput) {

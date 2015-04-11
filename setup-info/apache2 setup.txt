@@ -1,8 +1,6 @@
 sudo a2enmod auth_form
 sudo a2enmod session
-sudo a2enmod request
 sudo a2enmod session_cookie
-sudo service apache2 restart
 sudo a2enmod authn_dbd
 sudo a2enmod session_crypto
 sudo a2enmod proxy
@@ -11,14 +9,13 @@ sudo a2enmod session_dbd
 sudo a2enmod headers
 sudo a2enmod ssl
 sudo a2enmod rewrite
+sudo service apache2 restart
 
 php -r "echo '{SHA}' . base64_encode(sha1('admin', true)) . \"\n\";"
 
 sudo apt-get install libaprutil1-dbd-pgsql
 
-openssl genrsa -des3 -passout pass:x -out cmstest.pass.key 2048
-openssl rsa -passin pass:x -in cmstest.pass.key -out cmstest.key
-rm cmstest.pass.key
+openssl genrsa -out cmstest.key 2048
 openssl req -new -key cmstest.key -out cmstestrequest.csr
 openssl x509 -req -days 365 -in cmstestrequest.csr -signkey cmstest.key -out cmstest.crt
 rm cmstestrequest.csr
@@ -68,11 +65,9 @@ ServerName localhost
 	  
 	  ErrorDocument 401 /login.html
 	  AuthFormLoginSuccessLocation /cms/home
-	 
-	  # mod_authz_core configuration
+
 	  Require valid-user
-	 
-	  # mod_authn_dbd SQL query to authenticate a user
+	  
 	  AuthDBDUserPWQuery "SELECT password as password FROM cms_users WHERE username = %s"
 
 	</Location>
