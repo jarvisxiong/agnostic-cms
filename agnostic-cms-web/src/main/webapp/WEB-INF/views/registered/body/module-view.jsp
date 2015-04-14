@@ -8,7 +8,7 @@
  
 <tiles:insertDefinition name="registered.main">
     <tiles:putAttribute cascade="true" name="body">
-		<h2>${module.title}</h2>
+		<h1>${module.title}</h1>
 		<c:choose>
 			<c:when test="${not empty rows}">
 				<table class="table table-bordered">

@@ -18,13 +18,11 @@
 				</div>
 				<ul class="nav navbar-nav">
 					<? foreach($external_modules as $external_module) : ?>
-						<? if($external_module->activated): ?>
-							<li class="<?=$selected_external_module_id == $external_module->id ? 'active' : ''?>">
-								<a href="/cms<?=$external_module->url?>">
-									<?=$external_module->name?>
-								</a>
-							</li>
-						<? endif; ?>
+						<li class="<?=$selected_external_module_id == $external_module->id ? 'active' : ''?>">
+							<a href="/cms<?=$external_module->url?>">
+								<?=$external_module->name?>
+							</a>
+						</li>
 					<? endforeach; ?>
 				</ul>
 				<div class="collapse navbar-collapse">
@@ -53,13 +51,11 @@
 			<div class="col-md-2">
 				<ul class="nav nav-pills nav-stacked">					
 					<? foreach($modules as $module) : ?>
-						<? if($module->activated): ?>
-							<li>
-								<a href="/cms/module/view/<?=$module->id?>">
-									<?=$module->name?>
-								</a>
-							</li>
-						<? endif; ?>
+						<li>
+							<a href="/cms/module/view/<?=$module->id?>">
+								<?=$module->name?>
+							</a>
+						</li>
 					<? endforeach; ?>
 				</ul>
 			</div>
