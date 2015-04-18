@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title><!-- Insert your external module title here --></title>
+
+<!-- Change resource base path if necessary -->
+<link rel="stylesheet" href="resources/bootstrap.css">
+<!-- Change resource base path if necessary -->
+<script src="resources/jquery-2.1.3.min.js"></script>
+<!-- Change resource base path if necessary -->
+<script src="resources/bootstrap.js"></script>
+
+</head>
+
+<body>
+	<div class="container">
+		<nav id="navbar-example" class="navbar navbar-default navbar-static">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="/cms/home">Agnostic CMS</a>
+				</div>
+				<ul class="nav navbar-nav">
+					<!-- Foreach external module retrieved from DB -->
+						<!-- Add class active only if this external module is the one currently selected -->
+						<li class="active">
+							<!-- Append external module url retrieved from DB to /cms -->
+							<a href="/cms">
+								<!-- Output external module name here -->
+							</a>
+						</li>
+					<!-- End foreach -->
+				</ul>
+				<div class="collapse navbar-collapse">
+					<ul class="nav navbar-nav navbar-right">
+						<li id="fat-menu" class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+								<span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+								<!-- Output user's username retrieved from session here -->
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
+								<li role="presentation">
+									<a role="menuitem" tabindex="-1" href="/cms/logout">
+										<span class="glyphicon glyphicon-log-out"></span>
+										Logout
+									</a>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		
+		<div class="row">
+			<div class="col-md-2">
+				<ul class="nav nav-pills nav-stacked">
+					<!-- Foreach internal module retrieved from DB -->
+						<li>
+							<!-- Append internal module id to /cms/module/view/ -->
+							<a href="/cms/module/view/">
+								<!-- Output internal module name here -->
+							</a>
+						</li>
+					<!-- End foreach -->
+				</ul>
+			</div>
+			<div class="col-md-10">
+				<!-- Your external module content here -->
+			</div>
+		</div>
+	</div>
+	
+	<footer>
+		<div class="container">
+			<br />
+		</div>
+	</footer>
+</body>
+
+</html>
