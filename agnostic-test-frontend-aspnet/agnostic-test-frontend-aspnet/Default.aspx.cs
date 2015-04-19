@@ -28,9 +28,10 @@ namespace agnostictestfrontend
 			//        CREATE TABLE employee (
 			//           firstname varchar(32),
 			//           lastname varchar(32));
-			string sql = "SELECT m.id, m.name, m.title, mc.id, mc.name, mc.name, mc.name, mc.id " +
-										"FROM cms_modules m JOIN cms_module_columns mc " +
-										"ON mc.cms_module_id = m.id";
+			string sql = "SELECT pc.id, pc.name, pc.description, p.id, p.name, p.description, p.image, p.price " +
+										"FROM product_categories pc JOIN products p " +
+										"ON p.product_category_id = pc.id " +
+										"ORDER BY pc.id, p.id";
 			dbcmd.CommandText = sql;
 			NpgsqlDataReader reader = (Npgsql.NpgsqlDataReader) dbcmd.ExecuteReader();
 
@@ -44,7 +45,7 @@ namespace agnostictestfrontend
 				string productName = reader.GetString(4);
 				string productDescription = reader.GetString(5);
 				string productImage = reader.GetString(6);
-				decimal productPrice = (decimal) reader.GetInt64(7);
+				decimal productPrice = (decimal) reader.GetDouble(7);
 
 				if(curCategory == null || curCategory.id != categoryId) {
 					curCategory = new Category ();

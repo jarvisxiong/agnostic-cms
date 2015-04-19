@@ -38,10 +38,8 @@
 			<section id="header">
 				<div class="inner">
 					<span class="icon major fa-cloud"></span>
-					<h1>Hi, I'm <strong>Photon</strong>, another fine
-					little freebie from <a href="http://html5up.net">HTML5 UP</a>.</h1>
-					<p>ccumsan feugiat mi commodo erat lorem ipsum, sed magna
-					lobortis feugiat sapien sed etiam volutpat accumsan.</p>
+					<h1>Hi, this is an example of ASP.NET frontend application backed by Agnostic CMS</h1>
+					<p>ASP.NET here is powered by Mono - free and open source project</p>
 					<ul class="actions">
 						<li><a href="#one" class="button scrolly">Discover</a></li>
 					</ul>
@@ -53,21 +51,24 @@
 				<div class="container">
 					
 						<%
+						string resourceBase = "http://localhost:8080/cms/content-resources";
 						List<Category> categories = GetDBData();
 						foreach(Category category in categories) {
 						%>
 							<header class="major">
 								<h2><%=category.name%></h2>
 							</header>
-							<p>Ante nunc accumsan et aclacus nascetur ac ante amet sapien sed.</p>
+							<p><%=category.description%></p>
 							
 							<div class="row 150%">
 							<% foreach(Product product in category.products) { %>
 							
 								<div class="4u 12u$(medium)">
-								    <span class="image fit"><img src="images/pic02.jpg" alt="" /></span>
+								    <span class="image fit">
+								    	<img src="<%=resourceBase%><%=product.image%>" alt="<%=product.name%>" />
+								    </span>
 									<h3><%=product.name%></h3>
-									<p>Adipiscing a commodo ante nunc magna lorem et interdum mi ante nunc lobortis non amet vis sed volutpat et nascetur.</p>
+									<%=product.description%>
 									<ul class="actions">
 										<li><a href="#" class="button">More</a></li>
 									</ul>

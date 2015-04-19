@@ -3,6 +3,7 @@ package com.agnosticcms.web.dao;
 import static org.jooq.impl.DSL.table;
 import static org.jooq.impl.DSL.field;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,10 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SortField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -25,8 +28,15 @@ public class ModuleTableDao {
 	@Autowired
 	private DSLContext dslContext;
 	
-	public Result<Record> getRows(String tableName) {
-		return dslContext.selectFrom(table(tableName)).fetch();
+	public Result<Record> getRows(String tableName, Boolean ordered) {
+		List<SortField<?>> sortFields = new ArrayList<>();
+		if(BooleanUtils.isTrue(ordered)) {
+			sortFields.add(field("order_num").asc());
+		}
+		
+		sortFields.add(field("id").asc());
+		
+		return dslContext.selectFrom(table(tableName)).orderBy(sortFields).fetch();
 	}
 	
 	public Map<Long, Object> getSingleFieldValuesMap(String tableName, String columnName, Collection<Long> ids) {

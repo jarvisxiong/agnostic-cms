@@ -19,6 +19,7 @@ public abstract class RegisteredController {
 	private static final String ATTR_MODULES = "modules";
 	private static final String ATTR_EXTERNAL_MODULES = "externalModules";
 	private static final String ATTR_USERNAME = "username";
+	private static final String SESSION_ATTR_USER = "cms-user";
 	
 	@Autowired
 	protected ModuleService moduleService;
@@ -39,7 +40,7 @@ public abstract class RegisteredController {
 	
 	@ModelAttribute(ATTR_USERNAME)
 	public String getUsername() {
-		return sessionService.getAttribute("cms-user");
+		return sessionService.getAttribute(SESSION_ATTR_USER);
 	}
 	
 	/**
@@ -49,12 +50,12 @@ public abstract class RegisteredController {
 	protected void populateModuleAndView(ModelAndView modelAndView) {
 		modelAndView.addObject(ATTR_MODULES, getAllModules());
 		modelAndView.addObject(ATTR_EXTERNAL_MODULES, getAllExternalModules());
-		modelAndView.addObject(ATTR_USERNAME, getAllModules());
+		modelAndView.addObject(ATTR_USERNAME, getUsername());
 	}
 	
 	@RequestMapping("/logout")
 	public String logout() {
-		sessionService.removeAttribute("cms-user");
+		sessionService.removeAttribute(SESSION_ATTR_USER);
 		return "redirect:/";
 	}
 	

@@ -9,7 +9,8 @@
 		http://www.springframework.org/schema/security/spring-security-3.2.xsd
 		">
 
-	<security:http pattern="/initdb" security="none"/>
+	<security:http pattern="/initdb" security="none" />
+	<security:http pattern="/content-resources/**" security="none" />
 
 	<security:http use-expressions="true" auto-config="false" entry-point-ref="http403EntryPoint">
 		<security:custom-filter position="PRE_AUTH_FILTER" ref="apacheSessionFilter" />

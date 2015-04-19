@@ -66,13 +66,13 @@ public class ModuleDao {
 	
 	public List<Module> getAllModules() {
 		return dslContext.selectFrom(table(CmsTable.MODULES.getTableName()))
-				.orderBy(field("order_num"))
+				.orderBy(field("order_num"), field("id"))
 				.fetch(new ModuleRecordMapper());
 	}
 	
 	public List<ExternalModule> getAllExternalModules() {
 		return dslContext.selectFrom(table(CmsTable.EXTERNAL_MODULES.getTableName()))
-				.orderBy(field("order_num"))
+				.orderBy(field("order_num"), field("id"))
 				.fetch(new ExternalModuleRecordMapper());
 	}
 	
@@ -86,7 +86,7 @@ public class ModuleDao {
 	public List<ModuleColumn> getModuleColumns(Long moduleId) {
 		return dslContext.selectFrom(table(CmsTable.MODULE_COLUMNS.getTableName()))
 				.where(field("cms_module_id", Long.class).equal(moduleId))
-				.orderBy(field("order_num"))
+				.orderBy(field("order_num"), field("id"))
 				.fetch(new ModuleColumnRecordMapper());
 	}
 	

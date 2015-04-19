@@ -22,6 +22,7 @@ import com.agnosticcms.web.dto.ColumnType;
 import com.agnosticcms.web.dto.Lov;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
+import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.dto.form.ModuleInput;
 import com.agnosticcms.web.exception.DataIntegrityException;
 import com.agnosticcms.web.exception.TypeConversionException;
@@ -43,7 +44,7 @@ public class ModuleTableService {
 	
 	
 	public Result<Record> getRows(Module module) {
-		return moduleTableDao.getRows(module.getTableName());
+		return moduleTableDao.getRows(module.getTableName(), module.getOrdered());
 	}
 	
 	private <T> Map<Integer, T> getLov(List<Module> parentModules, List<String> fkNames, LovResultsRetriever<T> resultsRetriever) {
@@ -186,9 +187,10 @@ public class ModuleTableService {
 		
 		Long moduleId = module.getId();
 		List<ModuleColumn> moduleColumns = moduleDao.getModuleColumns(moduleId);
+		List<ModuleHierarchy> moduleHierarchies = moduleDao.getModuleHierarchies(moduleId);
 		List<Module> parentModules = moduleDao.getParentModules(moduleId);
 		
-		schemaDao.createOrUpdateModuleSchema(module, parentModules, moduleColumns);
+		schemaDao.createOrUpdateModuleSchema(module, parentModules, moduleHierarchies, moduleColumns);
 		
 		moduleDao.setActivated(moduleId, true);
 	}

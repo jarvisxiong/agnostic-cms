@@ -19,6 +19,7 @@ import com.agnosticcms.web.dto.CmsTable;
 import com.agnosticcms.web.dto.ColumnType;
 import com.agnosticcms.web.dto.Module;
 import com.agnosticcms.web.dto.ModuleColumn;
+import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.exception.DaoRuntimeException;
 import com.agnosticcms.web.exception.TypeConversionException;
 import com.agnosticcms.web.service.ColumnTypeService;
@@ -196,7 +197,7 @@ public class SchemaDao {
 		}, "Unable to create cms external modules table");
 	}
 	
-	public void createOrUpdateModuleSchema(Module module, List<Module> parentModules, List<ModuleColumn> moduleColumns) {
+	public void createOrUpdateModuleSchema(Module module, List<Module> parentModules, List<ModuleHierarchy> moduleHierarchies, List<ModuleColumn> moduleColumns) {
 		
 		execute((engine) -> {
 		
@@ -207,14 +208,21 @@ public class SchemaDao {
 			
 			if(CollectionUtils.isNotEmpty(parentModules)) {
 				Iterator<Module> parentModulesIt = parentModules.iterator();
+				Iterator<ModuleHierarchy> moduleHierarchiesIt = moduleHierarchies.iterator();
 				Iterator<String> foreignKeyColumnNamesIt = getForeignKeyColumnNames(parentModules).iterator();
 				
 				while(parentModulesIt.hasNext()) {
 					
 					Module parentModule = parentModulesIt.next();
+					ModuleHierarchy moduleHierarchy = moduleHierarchiesIt.next();
 					String foreignKeyColumnName = foreignKeyColumnNamesIt.next();
+
+					Builder foreignKeyColumnBuilder = SqlBuilder.dbColumn().name(foreignKeyColumnName).type(DbColumnType.LONG);
+					if(moduleHierarchy.getMandatory()) {
+						foreignKeyColumnBuilder.addConstraint(DbColumnConstraint.NOT_NULL);
+					}
 					
-					tableBuilder.addColumn(SqlBuilder.dbColumn().name(foreignKeyColumnName).type(DbColumnType.LONG).addConstraint(DbColumnConstraint.NOT_NULL).build());
+					tableBuilder.addColumn(foreignKeyColumnBuilder.build());
 					tableBuilder.addFk(SqlBuilder.dbFk().addColumn(foreignKeyColumnName).foreignTable(parentModule.getTableName()).addForeignColumn("id"));
 				}
 			}
