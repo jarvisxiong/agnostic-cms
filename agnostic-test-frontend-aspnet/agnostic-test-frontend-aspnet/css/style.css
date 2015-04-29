@@ -548,11 +548,15 @@
 			display: block;
 			margin: 0 0 2em 0;
 			width: 100%;
+			height: 320px;
+			position: relative;
 		}
 
 			.image.fit img {
 				width: 100%;
-				height: 190px;
+				position: absolute;
+				left: 0;
+				bottom: 0;
 			}
 
 /* List */
@@ -1335,3 +1339,5 @@
 					margin-left: 0;
 					padding: 0;
 				}
+
+
