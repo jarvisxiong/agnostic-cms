@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Single view that builds UI for multiplying product prices  -->
 <html>
 <head>
 <meta charset="UTF-8">
@@ -17,6 +18,7 @@
 					<a class="navbar-brand" href="/cms/home">Agnostic CMS</a>
 				</div>
 				<ul class="nav navbar-nav">
+					<!-- Output for all external modules from Agnostic CMS database -->
 					<? foreach($external_modules as $external_module) : ?>
 						<li class="<?=$selected_external_module_id == $external_module->id ? 'active' : ''?>">
 							<a href="/cms<?=$external_module->url?>">
@@ -30,6 +32,7 @@
 						<li id="fat-menu" class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
 								<span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+								<!-- Output of username, obtained from session -->
 								<?=$username?>
 								<span class="caret"></span>
 							</a>
@@ -49,7 +52,8 @@
 		
 		<div class="row">
 			<div class="col-md-2">
-				<ul class="nav nav-pills nav-stacked">					
+				<ul class="nav nav-pills nav-stacked">
+					<!-- Output of all internal modules from Agnostic CMS database -->
 					<? foreach($modules as $module) : ?>
 						<li>
 							<a href="/cms/module/view/<?=$module->id?>">
@@ -65,6 +69,7 @@
 				<div class="row">
 					<div class="col-md-3">
 						<form method="POST" action="">
+							<!-- Price multiplication form with the support of validation error display -->
 							<div class="form-group<?=validation_errors() ? ' has-error' : ''?>">
 								<label class="control-label" for="multiplier-input">Multiply prices by: </label>
 								<? if(validation_errors()): ?>
@@ -93,6 +98,7 @@
 						</tr>
 					</thead>
 					<tbody>
+						<!-- Output of all products from Agnostic CMS database -->
 						<? foreach($products as $product) : ?>
 							<tr>
 								<td><?=$product->id?></td>

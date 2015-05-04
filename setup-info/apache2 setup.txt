@@ -1,3 +1,5 @@
+
+# Enable all necessary apache2 modules
 sudo a2enmod auth_form
 sudo a2enmod session
 sudo a2enmod session_cookie
@@ -9,17 +11,20 @@ sudo a2enmod session_dbd
 sudo a2enmod headers
 sudo a2enmod ssl
 sudo a2enmod rewrite
+
+# Restart Apache
 sudo service apache2 restart
 
-php -r "echo '{SHA}' . base64_encode(sha1('admin', true)) . \"\n\";"
-
+# Install apr library for chosen database. In the example - PostgreSQL
 sudo apt-get install libaprutil1-dbd-pgsql
 
+# Generate private key and a self signed certificate for HTTPS
 openssl genrsa -out cmstest.key 2048
 openssl req -new -key cmstest.key -out cmstestrequest.csr
 openssl x509 -req -days 365 -in cmstestrequest.csr -signkey cmstest.key -out cmstest.crt
 rm cmstestrequest.csr
 
+# Import the keys into directory reachable for apache
 sudo mkdir /etc/apache2/keys
 sudo mv ./cmstest.crt /etc/apache2/keys
 sudo mv ./cmstest.key /etc/apache2/keys
@@ -27,73 +32,99 @@ sudo mv ./cmstest.key /etc/apache2/keys
 
 
 
-
+# Set server name for apache
 ServerName localhost
 
-
+# Settings for virtual host on port 443
 <VirtualHost *:443>
 
+	# Folder for the satic files
 	DocumentRoot /var/www/
 
+	# Choose driver and set appropriate connection string. Example - PostgreSQL
 	DBDriver pgsql
 	DBDParams "host=localhost dbname=agnosticcms port=5433 user=postgres password=postgres"
+	
+	# DB connection (pool, expiry) settings
 	DBDMin  4
 	DBDKeep 8
 	DBDMax  20
 	DBDExptime 300
+	
+	# SQL expressions that Apache will use for session persistence
 	DBDPrepareSQL "delete from cms_sessions where key = %s" deletesession
 	DBDPrepareSQL "update cms_sessions set value = %s, expiry = %lld, key = %s where key = %s" updatesession
 	DBDPrepareSQL "insert into cms_sessions (value, expiry, key) values (%s, %lld, %s)" insertsession
 	DBDPrepareSQL "select value from cms_sessions where key = %s and (expiry = 0 or expiry > %lld)" selectsession
 	DBDPrepareSQL "delete from cms_sessions where expiry != 0 and expiry < %lld" cleansession
 
+	# Enabling HTTPS
 	SSLEngine on
 	SSLCertificateFile keys/cmstest.crt
 	SSLCertificateKeyFile keys/cmstest.key
 
+	# Protected /cms path
 	<Location /cms>
-	  AuthFormProvider dbd
-	  AuthType form
-	  AuthName cms
-	 
-	  Session On
-	  SessionEnv On
-	  SessionDBDCookieName session path=/
-	  SessionCryptoPassphrase asjindsdci1232TFA74jas71QWsa
-	  SessionHeader X-Replace-Session
-	  RequestHeader set X-Session "%{HTTP_SESSION}e"
-	  
-	  ErrorDocument 401 /login.html
-	  AuthFormLoginSuccessLocation /cms/home
-
-	  Require valid-user
-	  
-	  AuthDBDUserPWQuery "SELECT password as password FROM cms_users WHERE username = %s"
-
+	
+		# Enabling form and DB based authentication
+		AuthFormProvider dbd
+		AuthType form
+		AuthName cms
+		 
+		# Enabling sessions, cookie names, encryption passphrases
+		Session On
+		SessionEnv On
+		SessionDBDCookieName session path=/
+		SessionCryptoPassphrase asjindsdci1232TFA74jas71QWsa
+		
+		# Session can be updated via X-Replace-Session header
+		SessionHeader X-Replace-Session
+		
+		# Session can be retrieved (by backend app) by X-Session header
+		RequestHeader set X-Session "%{HTTP_SESSION}e"
+		  
+		# If unauthorized, redirect to login page
+		ErrorDocument 401 /login.html
+		
+		# If successful authentication - redirect to Agnostic CMS home
+		AuthFormLoginSuccessLocation /cms/home
+	
+		# Existing user is sufficient for request proxying to backend apps
+		Require valid-user
+		
+		# SQL query for selecting password for username from db
+		AuthDBDUserPWQuery "SELECT password as password FROM cms_users WHERE username = %s"
 	</Location>
 
+	# All requests sent to proxy path /cms/php will be redirected to Agnostic CMS core
+	ProxyPass /cms http://localhost:8080/cms
+	
+	# Rewrites Agnostic CMS core HTTP respose headers accordingly
+	ProxyPassReverse  /cms http://localhost:8080/cms
+	
+	# Rewrites for cookies coming from Agnostic CMS core
+	ProxyPassReverseCookieDomain  localhost:8080 localhost
+	ProxyPassReverseCookiePath  /  /cms
+
+
+	# Similar configuration as above but for example PHP external module	
 	ProxyPass /cms/php http://localhost:8081
 	ProxyPassReverse  /cms/php http://localhost:8081
 	ProxyPassReverseCookieDomain  localhost:8081 localhost
-	ProxyPassReverseCookiePath  /  /cms
-
-	ProxyPass /cms http://localhost:8080/cms
-	ProxyPassReverse  /cms http://localhost:8080/cms
-	ProxyPassReverseCookieDomain  localhost:8080 localhost
 	
 </VirtualHost>
 
 
 
 
-
+# Directory configuration for external example PHP module
 <Directory "/home/tom/Desktop/Agnostic CMS/agnostic-cms/agnostic-test-backend-php">
 	Options Indexes FollowSymLinks
 	AllowOverride All
 	Require all granted
 </Directory>
 
-
+# Virtual host configuration for external example PHP module on port 8081
 Listen 8081
 <VirtualHost *:8081>
 	DocumentRoot "/home/tom/Desktop/Agnostic CMS/agnostic-cms/agnostic-test-backend-php"

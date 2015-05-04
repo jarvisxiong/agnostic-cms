@@ -1,7 +1,8 @@
 <?php
-$max_birth_date = date('Y') - 15;
 
-$config = array(	
+$config = array(
+	
+	// validation rules for price multiplier form
 	"products/multiplier" => array(
 		array (
 			'field'   => 'multiplier',

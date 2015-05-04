@@ -11,31 +11,34 @@ namespace agnostictestfrontend
 	public partial class Default : System.Web.UI.Page
 	{
 
+		// Disclaimer: This function contains naive c# code, ment just for illustrating how frontend can be built
+		// in the Agnostic CMS deployment.
+		// Returns a list of all categories created in Agnostic CMS and their belonging products
 		public List<Category> GetDBData () {
+			// String for connecting the database
 			string connectionString =
 				"Server=localhost;" +
 					"Database=agnosticcms;" +
 					"Port=5433;" +
 					"User ID=postgres;" +
 					"Password=postgres;";
+
+			// Naive implementation of database connection handling - new connection for each request
 			IDbConnection dbcon;
 			dbcon = new NpgsqlConnection(connectionString);
 			dbcon.Open();
 			IDbCommand dbcmd = dbcon.CreateCommand();
-			// requires a table to be created named employee
-			// with columns firstname and lastname
-			// such as,
-			//        CREATE TABLE employee (
-			//           firstname varchar(32),
-			//           lastname varchar(32));
+
 			string sql = "SELECT pc.id, pc.name, pc.description, p.id, p.name, p.description, p.image, p.price " +
 										"FROM product_categories pc JOIN products p " +
 										"ON p.product_category_id = pc.id " +
 										"ORDER BY pc.id, p.id";
 			dbcmd.CommandText = sql;
+			// Executing the sql query and returning rows of products and categories they belong to
 			NpgsqlDataReader reader = (Npgsql.NpgsqlDataReader) dbcmd.ExecuteReader();
 
 			List<Category> categories = new List<Category>();
+			// Current categoty in question
 			Category curCategory = null;
 			while(reader.Read()) {
 				long categoryId = reader.GetInt64(0);
@@ -47,6 +50,8 @@ namespace agnostictestfrontend
 				string productImage = reader.GetString(6);
 				decimal productPrice = (decimal) reader.GetDouble(7);
 
+				// As rows are ordered by category ids, we can create a new one only at time
+				// when the id changes
 				if(curCategory == null || curCategory.id != categoryId) {
 					curCategory = new Category ();
 					categories.Add (curCategory);
@@ -61,9 +66,11 @@ namespace agnostictestfrontend
 				product.description = productDescription;
 				product.image = productImage;
 				product.price = productPrice;
+
+				// Adding product to the current category in question
 				curCategory.addProcuct (product);
 			}
-			// clean up
+			// Close the connection
 			reader.Close();
 			reader = null;
 			dbcmd.Dispose();
@@ -75,6 +82,7 @@ namespace agnostictestfrontend
 		}
 	}
 
+	// Class for category and it's products from the Agnostic CMS database 
 	public class Category {
 		public long id { get; set;}
 		public string name { get; set;}
@@ -90,6 +98,7 @@ namespace agnostictestfrontend
 		}
  	}
 
+	// Class for products from the Agnostic CMS database 
 	public class Product {
 		public long id { get; set;}
 		public string description { get; set;}

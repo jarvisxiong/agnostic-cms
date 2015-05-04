@@ -7,9 +7,9 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="agnostictestfrontend" %>
 
-
 <!DOCTYPE HTML>
 <!--
+	Design:
 	Photon by HTML5 UP
 	html5up.net | @n33co
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
@@ -45,22 +45,25 @@
 					</ul>
 				</div>
 			</section>
-
-		<!-- Three -->
+				
 			<section id="three" class="main style1 special">
 				<div class="container">
 					
 						<%
+						// Image resource base, that targets Agnostic CMS core directly
 						string resourceBase = "http://localhost:8080/cms/content-resources";
+						// Obtaining categories and the products they contain
 						List<Category> categories = GetDBData();
 						foreach(Category category in categories) {
 						%>
+							<%-- Output for a single category --%>
 							<header class="major">
 								<h2><%=category.name%></h2>
 							</header>
 							<p><%=category.description%></p>
 							
 							<div class="row 150%">
+							<%-- Iteration over all products of current category --%>
 							<% foreach(Product product in category.products) { %>
 							
 								<div class="4u 12u$(medium)">
@@ -79,7 +82,7 @@
 				</div>
 			</section>
 
-		<!-- Footer -->
+			<!-- Footer -->
 			<section id="footer">
 				<ul class="icons">
 					<li><a href="#" class="icon alt fa-twitter"><span class="label">Twitter</span></a></li>
