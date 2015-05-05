@@ -33,6 +33,9 @@ import com.feedzai.commons.sql.abstraction.dml.dialect.SqlBuilder;
 import com.feedzai.commons.sql.abstraction.engine.DatabaseEngine;
 import com.feedzai.commons.sql.abstraction.engine.DatabaseEngineException;
 
+/**
+ * Data access object for database schema maintenance
+ */
 @Repository
 public class SchemaDao {
 	
@@ -49,6 +52,10 @@ public class SchemaDao {
 	private ColumnTypeService columnTypeService;
 	
 	
+	/**
+	 * Checks that all cms tables are created
+	 * @return true if all database tables exist, false otherwise
+	 */
 	public boolean cmsTablesExist() {
 		
 		for(CmsTable cmsTable : CmsTable.values()) {
@@ -60,6 +67,9 @@ public class SchemaDao {
 		return true;
 	}
 
+	/**
+	 * Creates database table for CMS users
+	 */
 	public void createCmsUsersTable() {
 		
 		execute((engine) -> {
@@ -75,6 +85,9 @@ public class SchemaDao {
 		}, "Unable to create cms users table");
 	}
 	
+	/**
+	 * Creates database table for CMS sessions
+	 */
 	public void createCmsSessionsTable() {
 		
 		execute((engine) -> {
@@ -91,6 +104,9 @@ public class SchemaDao {
 		}, "Unable to create cms users table");
 	}
 	
+	/**
+	 * Creates database table for modules without foreign key definitions
+	 */
 	public void createCmsModulesTable() {
 		
 		execute((engine) -> {
@@ -98,6 +114,9 @@ public class SchemaDao {
 		}, "Unable to create cms modules table");
 	}
 	
+	/**
+	 * @return Modules database table definition without foreign keys
+	 */
 	private DbEntity getCmsModulesTableDefinition() {
 		return SqlBuilder.dbEntity()
 	        .name(CmsTable.MODULES.getTableName())
@@ -114,6 +133,8 @@ public class SchemaDao {
 	}
 	
 	/**
+	 * Add foreign key definitions to modules table<br>
+	 * 
 	 * Needed because cms_modules and cms_module_columns have dependency on each other,
 	 * hence fk cannot be inserted on table creation time
 	 */
@@ -129,6 +150,9 @@ public class SchemaDao {
 		}, "Unable to create cms modules table");
 	}
 	
+	/**
+	 * Creates database table for module columns
+	 */
 	public void createCmsModuleColumnsTable() {
 		
 		execute((engine) -> {
@@ -158,6 +182,9 @@ public class SchemaDao {
 		}, "Unable to create cms module columns table");
 	}
 	
+	/**
+	 * Creates database table for module hierarchies
+	 */
 	public void createCmsModuleHierarchyTable() {
 		
 		execute((engine) -> {
@@ -178,6 +205,9 @@ public class SchemaDao {
 		}, "Unable to create cms module columns table");
 	}
 	
+	/**
+	 * Creates database table for external modules
+	 */
 	public void createCmsExtenalModulesTable() {
 		
 		execute((engine) -> {
@@ -197,20 +227,31 @@ public class SchemaDao {
 		}, "Unable to create cms external modules table");
 	}
 	
+	/**
+	 * Updates existing database table and relations of a module according to the given meta information, or
+	 * creates them if they do not exist
+	 * @param module The module for which the database schema should be updated
+	 * @param parentModules Parent modules of the given module
+	 * @param moduleHierarchies Module hierarchies the module is involved in as a child
+	 * @param moduleColumns Module columns of the given module
+	 */
 	public void createOrUpdateModuleSchema(Module module, List<Module> parentModules, List<ModuleHierarchy> moduleHierarchies, List<ModuleColumn> moduleColumns) {
 		
 		execute((engine) -> {
 		
+			// Create basic table definition with id as primary key
 			DbEntity.Builder tableBuilder = SqlBuilder.dbEntity();
 			tableBuilder.name(module.getTableName());
 			tableBuilder.addColumn(SqlBuilder.dbColumn().name("id").type(DbColumnType.LONG).autoInc(true).addConstraints(DbColumnConstraint.NOT_NULL).build());
 			tableBuilder.pkFields("id");
 			
+			// if there are parent modules, add the appropriate foreign keys
 			if(CollectionUtils.isNotEmpty(parentModules)) {
 				Iterator<Module> parentModulesIt = parentModules.iterator();
 				Iterator<ModuleHierarchy> moduleHierarchiesIt = moduleHierarchies.iterator();
 				Iterator<String> foreignKeyColumnNamesIt = getForeignKeyColumnNames(parentModules).iterator();
 				
+				// for all parent modules create a foreign key constraint and the corresponding column
 				while(parentModulesIt.hasNext()) {
 					
 					Module parentModule = parentModulesIt.next();
@@ -227,12 +268,14 @@ public class SchemaDao {
 				}
 			}
 			
+			// for all module columns create appropriate table columns
 			for(ModuleColumn moduleColumn : moduleColumns) {
 				Builder columnBuilder = SqlBuilder.dbColumn();
 				columnBuilder.name(moduleColumn.getNameInDb());
 				
 				DbColumnType dbColumnType;
 				ColumnType moduleColumnType = moduleColumn.getType();
+				// map module column types to database column types
 				switch (moduleColumnType) {
 				case BOOL:
 					dbColumnType = DbColumnType.BOOLEAN;
@@ -250,6 +293,7 @@ public class SchemaDao {
 				case STRING:
 					dbColumnType = DbColumnType.STRING;
 					
+					// apply max size to varchar column if present
 					Integer size = moduleColumn.getSize();
 					if(size != null) {
 						columnBuilder.size(size);
@@ -274,6 +318,7 @@ public class SchemaDao {
 				String defaultValueString = moduleColumn.getDefaultValue();
 				if(StringUtils.isNotEmpty(defaultValueString)) {
 					try {
+						// parse column's default value to appropriate type
 						Object defaultValue = columnTypeService.parseFromString(moduleColumn.getDefaultValue(), moduleColumnType);
 						columnBuilder.defaultValue(new K(defaultValue));
 					} catch (TypeConversionException e) {
@@ -284,17 +329,25 @@ public class SchemaDao {
 				tableBuilder.addColumn(columnBuilder.build());
 			}
 			
+			// if module should be ordered add order_num column which will contain order numbers
 			if(module.getOrdered()) {
 				tableBuilder.addColumn(SqlBuilder.dbColumn().name("order_num").type(DbColumnType.LONG).defaultValue(new K(0)).addConstraint(DbColumnConstraint.NOT_NULL).build());
 			}
-		
+			
+			// update entity or crete one if it doesn't exist
 			engine.updateEntity(tableBuilder.build());
 			
 		}, "Unable to create schema for module with name " + module.getName());
 	}
 	
+	/**
+	 * Generates foreign key column names for a module
+	 * @param parentModules Parent modules of module for which the keys should be generated
+	 * @return Foreign key names in the order of parent modules given
+	 */
 	public List<String> getForeignKeyColumnNames(List<Module> parentModules) {
 		
+		// contains count for how many times a table name has been met
 		Map<String, Integer> tableNameCountMap = new HashMap<>();
 		List<String> fkNames = new ArrayList<>();
 		
@@ -302,6 +355,7 @@ public class SchemaDao {
 			String tableName = parentModule.getTableName();
 			Integer tableNameCount = tableNameCountMap.get(tableName);
 			
+			// increasing table name count for every iteration
 			tableNameCount = (tableNameCount == null) ? 1 : tableNameCount + 1;
 			tableNameCountMap.put(tableName, tableNameCount);
 			
@@ -316,11 +370,17 @@ public class SchemaDao {
 		return fkNames;
 	}
 	
+	/**
+	 * Generates a foreign key name of a particular table
+	 * @param tableName Table name for which to generate the key
+	 * @param tableNameCount Order number of a foreign key of a child table
+	 * @return The foreign key name
+	 */
 	private String getForeignKeyColumnId(String tableName, Integer tableNameCount) {
 		
 		String foreignKeyId;
 		
-		// TODO re-enable this
+		// Singularize table name (for now - english names only)
 		if(tableName.endsWith("ies")) {
 			foreignKeyId = curFromEnd(tableName, 3) + "y";
 		} else if(tableName.endsWith("s")) {
@@ -329,6 +389,8 @@ public class SchemaDao {
 			throw new IllegalArgumentException("Unable to singularize table name " + tableName);
 		}
 		
+		// If more than one reference to the parent table from the child table, append an order number
+		// to every key, except the first
 		if(tableNameCount > 1) {
 			foreignKeyId += tableNameCount;
 		}
@@ -338,10 +400,21 @@ public class SchemaDao {
 		return foreignKeyId;
 	}
 	
+	/**
+	 * Cuts a number of symbols from the end of a string
+	 * @param string String to cut from
+	 * @param count Number of chars to cut
+	 * @return Trimmed string
+	 */
 	private String curFromEnd(String string, int count) {
 		return string.substring(0, string.length() - count);
 	}
 	
+	/**
+	 * Checks that a table exists in database
+	 * @param tableName Name of the table
+	 * @return True if tables exists, false otherwise
+	 */
 	public boolean tableExists(String tableName) {
 		try {
 			dslContext.fetchCount(DSL.selectFrom(DSL.table(tableName)));
@@ -352,6 +425,12 @@ public class SchemaDao {
 		return true;
 	}
 	
+	/**
+	 * Executes the given PulseDB work
+	 * @param pdbInterface The PulseDB work to execute
+	 * @param errorMsg Error message to add to the exception in case of failure
+	 * @throws DaoRuntimeException In case of work execution failure
+	 */
 	private void execute(PdbWorkContainer pdbInterface, String errorMsg) {
 		DatabaseEngine engine = pdbEngineProvider.getEngine();
 		
@@ -364,6 +443,9 @@ public class SchemaDao {
 		}
 	}
 	
+	/**
+	 * Interface for function that describes a PulseDB work
+	 */
 	@FunctionalInterface
 	private interface PdbWorkContainer {
 		public void executeWork(DatabaseEngine engine) throws DatabaseEngineException;

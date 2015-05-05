@@ -1,10 +1,28 @@
 package com.agnosticcms.web.dto;
 
+/**
+ * Type describing external modules
+ */
 public class ExternalModule extends BaseDto {
 
+	/**
+	 * External module's name
+	 */
 	private String name;
+	
+	/**
+	 * Relative URL of the external module's entry page 
+	 */
 	private String url;
+	
+	/**
+	 * Is the external module actived
+	 */
 	private Boolean activated;
+	
+	/**
+	 * Order number of the external module's name
+	 */
 	private Long orderNum;
 	
 	public ExternalModule() {

@@ -1,13 +1,43 @@
 package com.agnosticcms.web.dto;
 
+/**
+ * Type describing Agnostic CMS module
+ */
 public class Module extends BaseDto {
 
+	/**
+	 * Name of the module
+	 */
 	private String name;
+	
+	/**
+	 * Title of the module to show when it's open in UI
+	 */
 	private String title;
+	
+	/**
+	 * Name of the table containing module elements
+	 */
 	private String tableName;
+	
+	/**
+	 * Are the module elements ordered
+	 */
 	private Boolean ordered;
+	
+	/**
+	 * Is the module activated
+	 */
 	private Boolean activated;
+	
+	/**
+	 * Id of the column that is used to describe module elements in dropdowns and tables
+	 */
 	private Long lovColumnId;
+	
+	/**
+	 * Order number of the module
+	 */
 	private Long orderNum;
 	
 	public Module() {

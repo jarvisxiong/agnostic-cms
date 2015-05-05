@@ -8,9 +8,16 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.agnosticcms.web.exception.ResourceNotFoundException;
 
+/**
+ * Controller for global exception handling in Spring MVC controllers
+ */
 @ControllerAdvice
 public class GlobalExceptionController {
 	
+	
+	/**
+	 * Returns a 404 JSP page for certain exceptions
+	 */
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler({ResourceNotFoundException.class, NoHandlerFoundException.class})
 	public String notFound() {

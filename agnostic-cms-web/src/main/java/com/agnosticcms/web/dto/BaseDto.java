@@ -1,7 +1,13 @@
 package com.agnosticcms.web.dto;
 
+/**
+ * Parent class for standard Agnostic CMS database data transfer objects
+ */
 public abstract class BaseDto {
 
+	/**
+	 * Unique identifier of the object in it's kind
+	 */
 	private Long id;
 
 	public BaseDto() {

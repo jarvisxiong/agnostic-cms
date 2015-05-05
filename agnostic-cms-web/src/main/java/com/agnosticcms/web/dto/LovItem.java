@@ -1,7 +1,13 @@
 package com.agnosticcms.web.dto;
 
+/**
+ * Single list of values item
+ */
 public class LovItem extends BaseDto {
 
+	/**
+	 * The value of the list item
+	 */
 	private Object value;
 
 	public LovItem() {

@@ -6,15 +6,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.agnosticcms.web.service.SessionService;
 
+/**
+ * Controller for displaying home page of Agnostic CMS
+ */
 @Controller
 public class HomeController extends RegisteredController {
 	
 	@Autowired
 	private SessionService sessionService;
 	
+	/**
+	 * Shows greeting page for the user
+	 */
 	@RequestMapping("/home")
-	public String hello() {
-		
+	public String home() {
 		return "registered/body/home";
 	}
 
