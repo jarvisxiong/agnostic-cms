@@ -1,3 +1,4 @@
+<!-- Spring security configuration file -->
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -9,9 +10,12 @@
 		http://www.springframework.org/schema/security/spring-security-3.2.xsd
 		">
 
+	<!-- Database initialization link is always accessable -->
 	<security:http pattern="/initdb" security="none" />
+	<!-- So are uploaded resources -->
 	<security:http pattern="/content-resources/**" security="none" />
 
+	<!-- Only proxy server can access other pages and only if the user making request is authenticated -->
 	<security:http use-expressions="true" auto-config="false" entry-point-ref="http403EntryPoint">
 		<security:custom-filter position="PRE_AUTH_FILTER" ref="apacheSessionFilter" />
 		<security:intercept-url pattern="/**" access="hasIpAddress('127.0.0.1')" />

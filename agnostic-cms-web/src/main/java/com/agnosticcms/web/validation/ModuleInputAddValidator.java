@@ -4,6 +4,9 @@ import org.springframework.stereotype.Component;
 
 import com.agnosticcms.web.dto.ModuleColumn;
 
+/**
+ * Validator for adding a new module element
+ */
 @Component
 public class ModuleInputAddValidator extends ModuleInputValidator {
 

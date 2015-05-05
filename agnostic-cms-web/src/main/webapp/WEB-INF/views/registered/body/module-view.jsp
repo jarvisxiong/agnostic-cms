@@ -1,3 +1,5 @@
+<%-- view for module elements in a form of a table --%>
+
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
@@ -37,9 +39,11 @@
 							<spring:url var="deleteUrl" value="/module/delete/${module.id}/${rowId}" htmlEscape="true" />
 						
 							<tr>
+								<%-- output lov columns first --%>
 								<c:forEach var="foreignKeyName" items="${foreignKeyNames}" varStatus="loop">
 									<td>${lovs[loop.index][row[foreignKeyName]]}</td>
 								</c:forEach>
+								<%-- other columns afterwards --%>
 								<c:forEach var="column" items="${columns}">
 									<c:if test="${column.showInList}">
 										<td><t:displayer type="${column.type}" value="${row[column.nameInDb]}" displayWidth="50" /></td>

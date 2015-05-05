@@ -1,9 +1,23 @@
 package com.agnosticcms.web.dto;
 
+/**
+ * Describes one edge in module hierarchy graph
+ */
 public class ModuleHierarchy extends BaseDto {
 
+	/**
+	 * Parent module id
+	 */
 	private Long moduleId;
+	
+	/**
+	 * Child module id
+	 */
 	private Long module2Id;
+	
+	/**
+	 * Is the relationship between module elements mandatory
+	 */
 	private Boolean mandatory;
 	
 	public ModuleHierarchy() {

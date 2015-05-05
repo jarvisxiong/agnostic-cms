@@ -17,6 +17,7 @@
 	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
 		<property name="definitions">
 			<list>
+				<!-- Layout definition file for apache tiles framework -->
 				<value>/WEB-INF/tiles-layouts.xml</value>
 			</list>
 		</property>

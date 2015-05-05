@@ -22,8 +22,11 @@
 	
 	<context:property-placeholder location="classpath:properties/cms.properties" ignore-unresolvable="true" />
 	
+	<!-- built-in resources -->
 	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<!-- user uploaded resources -->
 	<mvc:resources mapping="/content-resources/**" location="file:${uploads.path}" />
+	
 	<mvc:annotation-driven ignore-default-model-on-redirect="true" />
 	
 	
@@ -48,6 +51,7 @@
         <property name="defaultEncoding" value="UTF-8" />
     </bean>
     
+    <!-- allows to change the locale via query param -->
     <bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
 		<property name="paramName" value="language" />
 	</bean>
@@ -63,5 +67,6 @@
 	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
 		<property name="defaultLocale" value="en" />
 	</bean>
+	<!-- /i18n -->
 	
 </beans>

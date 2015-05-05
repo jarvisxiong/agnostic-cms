@@ -20,8 +20,12 @@ import com.agnosticcms.web.dto.form.ValidatableModuleInput;
 import com.agnosticcms.web.exception.TypeConversionException;
 import com.agnosticcms.web.service.ColumnTypeService;
 
+/**
+ * Abstract validator both for updating and inserting module elements
+ */
 public abstract class ModuleInputValidator implements Validator {
 
+	// validation error i18n codes
 	private static final String CODE_REQUIRED = "validation.required";
 	private static final String CODE_INVALID_VALUE = "validation.value.invalid";
 	private static final String CODE_INVALID_NUMBER = "validation.number.invalid";
@@ -31,6 +35,9 @@ public abstract class ModuleInputValidator implements Validator {
 	private static final String CODE_FILE_WRONG_EXT = "validation.file.wrongExt";
 	private static final String CODE_FILE_ILLEGAL_FILE_NAME = "validation.file.illegalFileName";
 	
+	/**
+	 * Supported image extensions
+	 */
 	private static final Set<String> IMG_EXTENSIONS = new HashSet<>();
 	
 	static {
@@ -57,6 +64,7 @@ public abstract class ModuleInputValidator implements Validator {
 		
 		Map<Integer, Long> lovValues = moduleInput.getLovValues();
 		int i = 0;
+		// Checks that all mandatory LOV values are submitted
 		for(ModuleHierarchy moduleHierarchy : validatableModuleInput.getModuleHierarchies()) {
 			if(moduleHierarchy.getMandatory()) {
 				Long value = lovValues.get(i);
@@ -70,8 +78,10 @@ public abstract class ModuleInputValidator implements Validator {
 		
 		Map<Long, String> columnValues = moduleInput.getColumnValues();
 		Map<Long, MultipartFile> files = moduleInput.getFiles();
+		// Go through all the columns of a module
 		for(ModuleColumn moduleColumn : validatableModuleInput.getModuleColumns()) {
 			
+			// Continue only if the column should be processed
 			if(isColumnProcessable(moduleColumn)) {
 				Long columnId = moduleColumn.getId();
 				ColumnType columnType = moduleColumn.getType();
@@ -84,6 +94,7 @@ public abstract class ModuleInputValidator implements Validator {
 					
 					MultipartFile multipartFile = files.get(columnId);
 					if(multipartFile == null || multipartFile.isEmpty()) {
+						// Reject if mandatory file has not been uploaded
 						if(moduleColumn.getNotNull() && StringUtils.isEmpty(value)) {
 							errors.rejectValue(fieldName, CODE_REQUIRED);
 						}
@@ -91,15 +102,18 @@ public abstract class ModuleInputValidator implements Validator {
 						
 						String originalFilename = multipartFile.getOriginalFilename();
 						
+						// Reject if hidden file or there is no name for it
 						if(originalFilename == null || originalFilename.startsWith(".") || originalFilename.startsWith("~")) {
 							errors.rejectValue(fieldName, CODE_FILE_ILLEGAL_FILE_NAME);
 						}
 						
+						// Reject if non-supported extension
 						String extension = FilenameUtils.getExtension(originalFilename);
 						if(!IMG_EXTENSIONS.contains(extension.toLowerCase())) {
 							errors.rejectValue(fieldName, CODE_FILE_WRONG_EXT, new Object[] {StringUtils.join(IMG_EXTENSIONS, ", ")}, null);
 						}
 						
+						// Reject if size is too big
 						Integer maxSize = moduleColumn.getSize();
 						if(maxSize != null) {
 							if(maxSize < multipartFile.getSize()) {
@@ -114,9 +128,11 @@ public abstract class ModuleInputValidator implements Validator {
 					
 					String fieldName = getColumnValuesFieldName(columnId);
 					
+					// replace all manual line breaks from an HTML input (only for testing the blank value)
 					String blankTestValue = columnType == ColumnType.HTML ? value.replaceAll("(<br\\s*/?>)", "") : value;
 					
 					if((StringUtils.isBlank(blankTestValue) && columnType != ColumnType.BOOL)) {
+						// reject blank values if they are mandatory
 						if(moduleColumn.getNotNull()) {
 							errors.rejectValue(fieldName, CODE_REQUIRED);
 						}
@@ -125,9 +141,11 @@ public abstract class ModuleInputValidator implements Validator {
 						Object convertedValue;
 						
 						try {
+							// do the type conversion
 							convertedValue = columnTypeService.parseFromString(value, columnType);
 						} catch (TypeConversionException e) {
 							
+							// Show appropriate error message if type conversion error occours
 							String errorCode;
 							
 							switch (columnType) {
@@ -151,12 +169,14 @@ public abstract class ModuleInputValidator implements Validator {
 							
 							Integer size = moduleColumn.getSize();
 							
+							// Check for too long strings
 							if(size != null && size < ((String) convertedValue).length()) {
 								errors.rejectValue(fieldName, CODE_TOO_LONG, new Object[] {size}, null);
 								continue;
 							}
 							break;
 						case ENUM:
+							// Check for non-existing enum values
 							String[] enumValues = StringUtils.split(moduleColumn.getTypeInfo(), ",");
 							if(!ArrayUtils.contains(enumValues, convertedValue)) {
 								errors.rejectValue(fieldName, CODE_INVALID_VALUE);
@@ -176,20 +196,40 @@ public abstract class ModuleInputValidator implements Validator {
 		
 	}
 	
+	/**
+	 * Tells whether the module column should be processed by validation
+	 * @param moduleColumn The column to check
+	 * @return true if it should be processed, false if not
+	 */
 	protected abstract boolean isColumnProcessable(ModuleColumn moduleColumn);
 	
+	/**
+	 * Calls {@link #getFieldName(String, Number)} for LOV values
+	 */
 	private String getLovValuesFieldName(Integer id) {
 		return getFieldName("lovValues", id);
 	}
 	
+	/**
+	 * Calls {@link #getFieldName(String, Number)} for column values
+	 */
 	private String getColumnValuesFieldName(Long id) {
 		return getFieldName("columnValues", id);
 	}
 	
+	/**
+	 * Calls {@link #getFieldName(String, Number)} for files
+	 */
 	private String getImagesFieldName(Long id) {
 		return getFieldName("files", id);
 	}
 	
+	/**
+	 * Creates a field name that is submitted by Spring MVC form
+	 * @param baseName The base name of the submitted field
+	 * @param id The id of the submitted field
+	 * @return The full field name
+	 */
 	private String getFieldName(String baseName, Number id) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(baseName);

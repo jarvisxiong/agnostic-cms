@@ -5,10 +5,26 @@ import java.util.List;
 import com.agnosticcms.web.dto.ModuleColumn;
 import com.agnosticcms.web.dto.ModuleHierarchy;
 
+
+/**
+ * Contains module element input and additional metadata needed for it's validation
+ */
 public class ValidatableModuleInput {
 
+	/**
+	 * Module element input from form submission
+	 */
 	private ModuleInput moduleInput;
+	
+	/**
+	 * Columns of a module whose element is posted
+	 */
 	private List<ModuleColumn> moduleColumns;
+	
+	/**
+	 * Hierarchy elements of a module (those where the module is involved as a child)
+	 * whose element is posted
+	 */
 	private List<ModuleHierarchy> moduleHierarchies;
 	
 	

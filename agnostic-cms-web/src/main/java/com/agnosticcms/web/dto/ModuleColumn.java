@@ -1,19 +1,74 @@
 package com.agnosticcms.web.dto;
 
+/**
+ * Type describing Agnostic CMS module column
+ */
 public class ModuleColumn extends BaseDto {
 	
+	/**
+	 * Id of the module the column belongs to
+	 */
 	private Long moduleId;
+	
+	/**
+	 * Name of the column
+	 */
 	private String name;
+	
+	/**
+	 * Name of the corresponding column in db
+	 */
 	private String nameInDb;
+	
+	/**
+	 * Type of the column
+	 */
 	private ColumnType type;
+	
+	/**
+	 * Size of the column. Can have different meanings in different types. For example string size
+	 * in characters or file size in bytes
+	 */
 	private Integer size;
+	
+	/**
+	 * Additional info for the type. Contents depend on column type
+	 */
 	private String typeInfo;
+	
+	/**
+	 * Is the value of the column mandatory
+	 */
 	private Boolean notNull;
+	
+	/**
+	 * Default value of the column
+	 */
 	private String defaultValue;
+	
+	/**
+	 * Can the value be changed after it's initialization
+	 */
 	private Boolean readOnly;
+	
+	/**
+	 * Should the column be displayed in UI's table view
+	 */
 	private Boolean showInList;
+	
+	/**
+	 * Should the column be displayed in the "add new element" view
+	 */
 	private Boolean showInAdd;
+	
+	/**
+	 * Should the column be displayed in the "edit existing element" view
+	 */
 	private Boolean showInEdit;
+	
+	/**
+	 * Order number of the column
+	 */
 	private Integer orderNum;
 	
 	

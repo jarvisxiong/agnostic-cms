@@ -1,9 +1,15 @@
 package com.agnosticcms.web.exception;
 
+/**
+ * Runtime exception that is thrown when there is a failure in data integrity checks during query execution
+ */
 public class DataIntegrityException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * Code of a message displayable to the user in UI
+	 */
 	private String i18nMessageCode;
 
 	public DataIntegrityException(String message, Throwable cause) {

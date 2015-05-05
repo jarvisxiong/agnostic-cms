@@ -1,3 +1,5 @@
+<%-- Top template for all Agnostic CMS pages --%>
+
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
@@ -23,6 +25,7 @@
 <script src="${jqueryJsUrl}"></script>
 <script src="${bootstrapJsUrl}"></script>
 
+<%-- Only include wysiwyg stuff if it's needed  --%>
 <c:if test="${wysiwygEnabled}">
 	<link rel="stylesheet" href="${fontAwesomeCssUrl}">
 	<link rel="stylesheet" href="${summernoteCssUrl}">

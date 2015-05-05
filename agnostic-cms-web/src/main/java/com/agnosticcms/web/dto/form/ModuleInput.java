@@ -5,10 +5,24 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Generic module element input from Spring MVC form
+ */
 public class ModuleInput {
 
+	/**
+	 * Values chosen in list of values dropdowns. Format - "LOV order number => element id"
+	 */
 	private Map<Integer, Long> lovValues;
+	
+	/**
+	 * Values of the module columns. Format - "column id => column value"
+	 */
 	private Map<Long, String> columnValues;
+	
+	/**
+	 * Uploaded files. Format - "corresponding column id => uploaded file"
+	 */
 	private Map<Long, MultipartFile> files;
 	
 	
