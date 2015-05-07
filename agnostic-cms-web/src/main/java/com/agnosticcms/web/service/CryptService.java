@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
  * Service for encryption and decryption functionality
  */
 @Service
-public class CrypService {
+public class CryptService {
 
 	/**
 	 * Computes base64 of a sha1 of a string 

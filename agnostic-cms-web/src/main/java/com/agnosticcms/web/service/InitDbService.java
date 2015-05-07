@@ -28,7 +28,7 @@ public class InitDbService {
 	private UserDao userDao;
 	
 	@Autowired
-	private CrypService crypService;
+	private CryptService crypService;
 	
 	@Autowired
 	private ModuleDao moduleDao;

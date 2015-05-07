@@ -23,7 +23,7 @@ import com.agnosticcms.web.dto.ModuleHierarchy;
 import com.agnosticcms.web.exception.DaoRuntimeException;
 import com.agnosticcms.web.exception.TypeConversionException;
 import com.agnosticcms.web.service.ColumnTypeService;
-import com.agnosticcms.web.service.CrypService;
+import com.agnosticcms.web.service.CryptService;
 import com.feedzai.commons.sql.abstraction.ddl.DbColumn.Builder;
 import com.feedzai.commons.sql.abstraction.ddl.DbColumnConstraint;
 import com.feedzai.commons.sql.abstraction.ddl.DbColumnType;
@@ -43,7 +43,7 @@ public class SchemaDao {
 	private PdbEngineProvider pdbEngineProvider;
 	
 	@Autowired
-	private CrypService crypService;
+	private CryptService crypService;
 	
 	@Autowired
 	private DSLContext dslContext;
