@@ -18,7 +18,7 @@ public class HomeController extends RegisteredController {
 	/**
 	 * Shows greeting page for the user
 	 */
-	@RequestMapping("/home")
+	@RequestMapping({"/", "/home"})
 	public String home() {
 		return "registered/body/home";
 	}
